@@ -1,33 +1,25 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/tauri";
-  
-  
-    // Define the menu structure
-    const menuOptions = [
-      { label: 'Home', href: '/Home.svelte' },
-      { label: 'About', href: '#' },
-      { label: 'Services', href: '#' },
-      { label: 'Portfolio', href: '#' },
-      { label: 'Contact', href: '#' },
-    ];
-  </script>
-  
-  <div class="app-layout">
-    <!-- Sidebar menu -->
-    <aside class="sidebar">
-      <ul>
-        {#each menuOptions as { label, href }}
-          <li><a href={href}>{label}</a></li>
-        {/each}
-      </ul>
-    </aside>
-  
-    <!-- Main content -->
-    <div class="container">
-      <!-- Existing content goes here -->
-    </div>
+  import { goto } from "$app/navigation";
+  import { invoke } from "@tauri-apps/api/tauri";
+</script>
+
+<div class="app-layout">
+  <!-- Sidebar menu -->
+  <aside class="sidebar">
+    <ul>
+      <li><a href="/Home">Home</a></li>
+      <li><a href="/Library">Library</a></li>
+      <li><a href="/Downloads">Downloads</a></li>
+      <li><a href="/Settings">Settings</a></li>
+      <li><a href="/About">About</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main content -->
+  <div class="container">
+    <!-- Existing content goes here -->
   </div>
-  
-  <style>
-  
-  </style>
+</div>
+
+<style>
+</style>
