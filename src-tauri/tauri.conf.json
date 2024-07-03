@@ -15,10 +15,6 @@
       "shell": {
         "all": false,
         "open": true,
-        "sidecar": true,
-        "scope": [
-          { "name": ".venv/bin/python", "sidecar": true }
-        ]
       }
     },
     "windows": [
