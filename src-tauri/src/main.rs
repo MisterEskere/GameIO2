@@ -2,9 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::process::Command;
-use scraper::{selector, Html, Selector};
+use scraper::{Html, Selector};
 use serde_json::{json, Value};
-use std::collections::HashMap;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 /*
@@ -33,15 +32,21 @@ fn fitgirl_search(search_argument: &str) {
 
     for element in document.select(&selector) {
         
+        //TODO optimize the code below
         // from the element parse the tag <h1 class="entry-title"> and get the text
         let game_title = element.select(&Selector::parse("h1[class*='entry-title']").unwrap()).next().unwrap().text().collect::<Vec<_>>().join(" ");
-        print!("Game title: {}\n", game_title);
-    }
 
-    // print the vector of JSON objects
-    for game in games {
-        println!("---------------------");
-        println!("{}", game);
+        // from the element parse the tag <a> inside the tag <h1 class="entry-title"> and get the href
+        let game_link = element.select(&Selector::parse("h1[class*='entry-title'] a").unwrap()).next().unwrap().value().attr("href").unwrap();
+
+        // create new JSON object
+        let game = json!({
+            "title": game_title,
+            "link": game_link
+        });
+
+        // push the JSON object to the vector
+        games.push(game);
     }
 
 }
