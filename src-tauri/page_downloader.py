@@ -1,19 +1,23 @@
 import requests
 import sys
 
-# Check if a game name is provided as a command-line argument
-if len(sys.argv) < 2:
-    print("Usage: python page_downloader.py <url>")
-    sys.exit(1)
+try:
+    url = sys.argv[1]
+    domain = sys.argv[2]
+    headers = {'Host': domain}
+except:
+    url = f"https://190.115.31.179/?s=gta"
+    domain = "fitgirl-repacks.site"
+    headers = {'Host': domain}
 
-url = sys.argv[1]
-headers = sys.argv[2]
+print("URL:", url)
+print("Headers:", headers)
 
 # Make the request to get the page
 try:
-    response = requests.get(url, headers, verify=True)
+    response = requests.get(url, headers=headers, verify=True)
 except:
-    response = requests.get(url, headers, verify=False)
+    response = requests.get(url, headers=headers, verify=False)
 
 
 # save the page to a file
