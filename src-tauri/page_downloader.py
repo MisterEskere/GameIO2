@@ -7,12 +7,13 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 url = sys.argv[1]
+headers = sys.argv[2]
 
 # Make the request to get the page
 try:
-    response = requests.get(url, verify=True)
+    response = requests.get(url, headers, verify=True)
 except:
-    response = requests.get(url, verify=False)
+    response = requests.get(url, headers, verify=False)
 
 
 # save the page to a file
