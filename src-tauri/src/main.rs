@@ -29,12 +29,14 @@ fn greet(name: &str) -> String {
 /// fitgirl_search("cyberpunk");
 /// ```
 ///
-/// # Note
+/// # Returns
+/// 
+/// A vector of JSON objects, where each object contains the title and link of a game repack.
 ///
 /// This function downloads the search results into a temporary HTML file named `tmp.html`, which is then read and parsed.
 /// Ensure that the `tmp.html` file is managed appropriately.
 #[tauri::command]
-fn fitgirl_search(search_argument: &str) {
+fn fitgirl_search(search_argument: &str) -> Vec<Value> {
 
     // Download the search results of https://fitgirl-repacks.site
     let domain = "fitgirl-repacks.site";
@@ -70,6 +72,9 @@ fn fitgirl_search(search_argument: &str) {
         games.push(game);
     }
 
+    // return the games vector
+    games
+
 }
 
 
@@ -81,16 +86,21 @@ fn page_downloader(url: &str, domain: &str) {
         .status()
         .expect("failed to execute process");
 }
-
-fn main() {
-    fitgirl_search("gta");
-}
-
 /*
 fn main() {
+    let tmp_vector: Vec<Value> = fitgirl_search("gta");
+
+    for game in tmp_vector {
+        println!("Title: {}", game["title"]);
+        println!("Link: {}", game["link"]);
+    }
+}
+*/
+
+
+fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![fitgirl_search])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-*/

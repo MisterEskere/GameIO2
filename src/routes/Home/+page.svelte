@@ -1,6 +1,9 @@
 <script lang="ts">
   import Menu from '../Menu.svelte';
+  import { invoke } from '@tauri-apps/api/tauri'
 
+
+  // invoker of fitgirl_search function
 </script>
 
 <main>
@@ -12,7 +15,7 @@
     <h1>Game Search</h1>
 
     <input type="text" placeholder="Search for a game" />
-    <button>Search</button>
+    <button on:click={invoke(:)}>Search</button>
 
   </div>
 </main>
