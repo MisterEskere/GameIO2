@@ -2,8 +2,11 @@
   import Menu from '../Menu.svelte';
   import { invoke } from '@tauri-apps/api/tauri'
 
-
   // invoker of fitgirl_search function
+  async function invoker(game_to_search: string) {
+    const response = await invoke('fitgirl_search', {search_argument: game_to_search});
+    console.log(response);
+  }
 </script>
 
 <main>
@@ -15,7 +18,7 @@
     <h1>Game Search</h1>
 
     <input type="text" placeholder="Search for a game" />
-    <button on:click={invoke(:)}>Search</button>
+    <button on:click={() => invoker("ghost")}>Search</button>
 
   </div>
 </main>
