@@ -13,7 +13,27 @@ fn greet(name: &str) -> String {
 }
 */
 
-
+/// Searches for game repacks on the FitGirl website using a specified search argument.
+///
+/// This function performs a search on the FitGirl Repacks site by constructing a URL with the search argument.
+/// It then downloads the search results page, parses the HTML content to extract game titles and links,
+/// and stores them in a vector of JSON objects.
+///
+/// # Arguments
+///
+/// * `search_argument` - A string slice that holds the search term to be used in the query.
+///
+/// # Examples
+///
+/// ```
+/// fitgirl_search("cyberpunk");
+/// ```
+///
+/// # Note
+///
+/// This function downloads the search results into a temporary HTML file named `tmp.html`, which is then read and parsed.
+/// Ensure that the `tmp.html` file is managed appropriately.
+#[tauri::command]
 fn fitgirl_search(search_argument: &str) {
 
     // Download the search results of https://fitgirl-repacks.site
@@ -30,6 +50,7 @@ fn fitgirl_search(search_argument: &str) {
     // Create a vector of JSON objects
     let mut games: Vec<Value> = Vec::new();
 
+    // Iterate over the elements of the document
     for element in document.select(&selector) {
         
         //TODO optimize the code below
