@@ -5,7 +5,8 @@ mod utils;
 use serde_json::{json, Value};
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
-async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, reqwest::Error> {
+#[tauri::command]
+async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, String> {
 
     // Retrieve the API_KEY from the .env file
     let api_key = utils::get_api_key().await;
@@ -14,7 +15,10 @@ async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, reqwest::Error
     let url: String = format!("https://rawg.io/api/games?page=1&page_size=10&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game, api_key);
 
     // Make the request
-    let response = utils::get_request(&url).await?;
+    let response = match utils::get_request(&url).await {
+        Ok(resp) => resp,
+        Err(e) => return Err(e.to_string()), // Convert the error to a String here
+    };
 
     // Of the response, extract the "next" field TODO da implementare
     let next = response["next"].as_str().unwrap();
@@ -46,7 +50,8 @@ async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, reqwest::Error
 }
 
 /// Makes a GET request to "https://rawg.io/api/games/ID_OF_GAME?key=API_KEY"
-async fn game_details(game_id: &i64) -> Result<Value, reqwest::Error> {
+#[tauri::command]
+async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 
     // Retrieve the API_KEY from the .env file
     let api_key = utils::get_api_key().await;
@@ -55,7 +60,10 @@ async fn game_details(game_id: &i64) -> Result<Value, reqwest::Error> {
     let url = format!("https://rawg.io/api/games/{}?key={}", game_id, api_key);
 
     // Make the request
-    let response = utils::get_request(&url).await?;
+    let response = match utils::get_request(&url).await {
+        Ok(resp) => resp,
+        Err(e) => return Err(e.to_string()), // Convert the error to a String here
+    };
 
     // Of the response, extract the "id", "slug", "name", "name_original", "description", 
     // "metacritic", "image_background", "background_image_additional", "released", "genres"
@@ -88,22 +96,22 @@ async fn game_details(game_id: &i64) -> Result<Value, reqwest::Error> {
     Ok(game)
 }
 
+
+/*
 #[tokio::main]
 async fn main() {
     // test the games_list function
-    let games = games_list("League of Legends").await.unwrap();
+    let games = games_list("").await.unwrap();
     println!("{:?}", games);
 
-    let game = game_details(&23598).await.unwrap();
+    let game = game_details(23598).await.unwrap();
     println!("{:?}", game);
 }
+ */
 
-
-/*
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![fitgirl_search, fitgirl_game])
+        .invoke_handler(tauri::generate_handler![games_list, game_details])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-*/
