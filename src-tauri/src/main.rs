@@ -1,106 +1,109 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::process::Command;
-use scraper::{Html, Selector};
+mod utils;
 use serde_json::{json, Value};
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-/*
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-*/
+/// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
+async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, reqwest::Error> {
 
-/// Searches for game repacks on the FitGirl website using a specified search argument.
-///
-/// This function performs a search on the FitGirl Repacks site by constructing a URL with the search argument.
-/// It then downloads the search results page, parses the HTML content to extract game titles and links,
-/// and stores them in a vector of JSON objects.
-///
-/// # Arguments
-///
-/// * `search_argument` - A string slice that holds the search term to be used in the query.
-///
-/// # Examples
-///
-/// ```
-/// fitgirl_search("cyberpunk");
-/// ```
-///
-/// # Returns
-/// 
-/// A vector of JSON objects, where each object contains the title and link of a game repack.
-///
-/// This function downloads the search results into a temporary HTML file named `tmp.html`, which is then read and parsed.
-/// Ensure that the `tmp.html` file is managed appropriately.
-#[tauri::command]
-fn fitgirl_search(search_argument: &str) -> Vec<Value> {
+    // Retrieve the API_KEY from the .env file
+    let api_key = utils::get_api_key().await;
 
-    // Download the search results of https://fitgirl-repacks.site
-    let domain = "fitgirl-repacks.site";
-    let url = format!("https://190.115.31.179/?s={}", search_argument);
-    page_downloader(&url, domain);
+    // Create the URL
+    let url: String = format!("https://rawg.io/api/games?page=1&page_size=10&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game, api_key);
 
+    // Make the request
+    let response = utils::get_request(&url).await?;
 
-    // Extract the contente of tmp.html
-    let content = std::fs::read_to_string("tmp.html").unwrap();
-    let document = Html::parse_document(&content);
-    let selector = Selector::parse("article[class*='post type-post status-publish format-standard hentry category-lossless-repack']").unwrap();
+    // Of the response, extract the "next" field TODO da implementare
+    let next = response["next"].as_str().unwrap();
 
-    // Create a vector of JSON objects
-    let mut games: Vec<Value> = Vec::new();
+    // Of the response, extract the "results" list
+    let results = response["results"].as_array().unwrap();
 
-    // Iterate over the elements of the document
-    for element in document.select(&selector) {
-        
-        //TODO optimize the code below
-        // from the element parse the tag <h1 class="entry-title"> and get the text
-        let game_title = element.select(&Selector::parse("h1[class*='entry-title']").unwrap()).next().unwrap().text().collect::<Vec<_>>().join(" ");
+    // Of the "results" list, extract: "slug", "name", "released", "background_image", "metacritic", "id"
+    // saves them in a list of json objects
+    let mut games: Vec<serde_json::Value> = Vec::new();
+    for game in results {
+        let slug = game["slug"].as_str().unwrap();
+        let name = game["name"].as_str().unwrap();
+        let background_image = game["background_image"].as_str().unwrap();
+        let id = game["id"].as_i64().unwrap();
 
-        // from the element parse the tag <a> inside the tag <h1 class="entry-title"> and get the href
-        let game_link = element.select(&Selector::parse("h1[class*='entry-title'] a").unwrap()).next().unwrap().value().attr("href").unwrap();
-
-        // create new JSON object
         let game = json!({
-            "title": game_title,
-            "link": game_link
+            "id": id,
+            "slug": slug,
+            "name": name,
+            "background_image": background_image
         });
 
-        // push the JSON object to the vector
         games.push(game);
     }
 
-    // return the games vector
-    games
+    // Return the response
+    Ok(games)
+}
 
+/// Makes a GET request to "https://rawg.io/api/games/ID_OF_GAME?key=API_KEY"
+async fn game_details(game_id: &i64) -> Result<Value, reqwest::Error> {
+
+    // Retrieve the API_KEY from the .env file
+    let api_key = utils::get_api_key().await;
+
+    // Create the URL
+    let url = format!("https://rawg.io/api/games/{}?key={}", game_id, api_key);
+
+    // Make the request
+    let response = utils::get_request(&url).await?;
+
+    // Of the response, extract the "id", "slug", "name", "name_original", "description", 
+    // "metacritic", "image_background", "background_image_additional", "released", "genres"
+    let id = response["id"].as_i64().unwrap();
+    let slug = response["slug"].as_str().unwrap();
+    let name = response["name"].as_str().unwrap();
+    let name_original = response["name_original"].as_str().unwrap();
+    let description = response["description"].as_str().unwrap();
+    let metacritic = response["metacritic"].as_i64().unwrap();
+    let background_image = response["background_image"].as_str().unwrap();
+    let background_image_additional = response["background_image_additional"].as_str().unwrap();
+    let released = response["released"].as_str().unwrap();
+    let genres = response["genres"].as_array().unwrap();
+
+    // make a JSON object with the extracted fields
+    let game = json!({
+        "id": id,
+        "slug": slug,
+        "name": name,
+        "name_original": name_original,
+        "description": description,
+        "metacritic": metacritic,
+        "background_image": background_image,
+        "background_image_additional": background_image_additional,
+        "released": released,
+        "genres": genres
+    });
+
+    // Return the response
+    Ok(game)
+}
+
+#[tokio::main]
+async fn main() {
+    // test the games_list function
+    let games = games_list("League of Legends").await.unwrap();
+    println!("{:?}", games);
+
+    let game = game_details(&23598).await.unwrap();
+    println!("{:?}", game);
 }
 
 
-fn page_downloader(url: &str, domain: &str) { 
-    Command::new("python")
-        .arg("page_downloader.py")
-        .arg(url)
-        .arg(domain)
-        .status()
-        .expect("failed to execute process");
-}
 /*
 fn main() {
-    let tmp_vector: Vec<Value> = fitgirl_search("gta");
-
-    for game in tmp_vector {
-        println!("Title: {}", game["title"]);
-        println!("Link: {}", game["link"]);
-    }
-}
-*/
-
-
-fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![fitgirl_search])
+        .invoke_handler(tauri::generate_handler![fitgirl_search, fitgirl_game])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+*/

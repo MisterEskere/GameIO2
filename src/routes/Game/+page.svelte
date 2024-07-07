@@ -15,11 +15,6 @@
   // response from the game
   let gameResponse = '';
 
-  // invoker of fitgirl_search function
-  async function fitgirl_search_invoke(search_argument: string) {
-    searchResponse = await invoke('fitgirl_search', {searchArgument: search_argument});
-  }
-
   async function fitgirl_game_invoke(games_page: string) {
     gameResponse = await invoke('fitgirl_game', {gamesPage: games_page});
   }
@@ -35,17 +30,11 @@
 
     <input type="text" placeholder="Search for a game" bind:value={inputValue} />
   
-    <button on:click={() => fitgirl_search_invoke(inputValue)}>Search</button>
+    <button on:click={() => fitgirl_search_invoke(inputValue)}>Download</button>
 
 
     <!-- Create a new entry for each game and make it recall the game_detail_invoke-->
-    <div class="response">
-      {#each searchResponse as item}
-        <button type="button" on:click={() => fitgirl_game_invoke(item.link)} role="link">
-          <h2>{item.title}</h2>
-        </button>
-      {/each}
-    </div>
+    
   </div>
 </main>
 
