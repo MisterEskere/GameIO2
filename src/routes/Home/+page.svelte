@@ -1,49 +1,50 @@
 <script lang="ts">
   import Menu from '../Menu.svelte';
   import { invoke } from '@tauri-apps/api/tauri';
+  import { onMount } from 'svelte';
 
-  // value of the search input
+  onMount(() => {
+    games_list_invoke("");
+  });
+
   let inputValue = '';
 
-  // response from the search
   interface Game {
-    title: string;
-    link: string;
+    "id": number,
+    "name": string,
+    "slug": string,
+    "background_image": string
   }
   let searchResponse: Game[] = [];
 
-  // response from the game
-  let gameResponse = '';
-
-  // invoker of fitgirl_search function
-  async function fitgirl_search_invoke(search_argument: string) {
-    searchResponse = await invoke('fitgirl_search', {searchArgument: search_argument});
+  async function games_list_invoke(game_name: string) {
+    searchResponse = await invoke('games_list', {gameName: game_name});
   }
 
-  async function fitgirl_game_invoke(games_page: string) {
-    gameResponse = await invoke('fitgirl_game', {gamesPage: games_page});
+  function showDetails(slug: string) {
+    invoke('game_detail', {game: slug});
   }
+
 </script>
 
 <main>
-  <!-- Import the menu-->
   <Menu />
   
-  <!-- Main content -->
   <div class="container">
     <h1>Game Search</h1>
 
     <input type="text" placeholder="Search for a game" bind:value={inputValue} />
   
-    <button on:click={() => fitgirl_search_invoke(inputValue)}>Search</button>
+    <button on:click={() => games_list_invoke(inputValue)}>Search</button>
 
-
-    <!-- Create a new entry for each game and make it recall the game_detail_invoke-->
-    <div class="response">
+    <div class="game-grid">
       {#each searchResponse as item}
-        <button type="button" on:click={() => fitgirl_game_invoke(item.link)} role="link">
-          <h2>{item.title}</h2>
-        </button>
+        <div class="game-card" on:click={() => showDetails(item.slug)}>
+          <img class="game-image" src={item.background_image} alt={item.name} />
+          <div class="game-info">
+            <h2 class="game-title">{item.name}</h2>
+          </div>
+        </div>
       {/each}
     </div>
   </div>
@@ -59,13 +60,12 @@
     padding: 20px;
   }
 
-  input {
+  input, button {
     padding: 10px;
-    margin-right: 10px;
+    margin: 5px 0;
   }
 
   button {
-    padding: 10px;
     background-color: #333;
     color: white;
     border: none;
@@ -79,4 +79,40 @@
     background-color: #777;
   }
 
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #202020;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .game-card:hover {
+    transform: scale(1.05);
+  }
+
+  .game-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+  }
+
+  .game-info {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .game-title {
+    margin: 10px 0;
+    color: #fff;
+  }
 </style>

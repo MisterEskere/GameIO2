@@ -6,13 +6,13 @@ use serde_json::{json, Value};
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
 #[tauri::command]
-async fn games_list(game: &str) -> Result<Vec<serde_json::Value>, String> {
+async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 
     // Retrieve the API_KEY from the .env file
     let api_key = utils::get_api_key().await;
 
     // Create the URL
-    let url: String = format!("https://rawg.io/api/games?page=1&page_size=10&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game, api_key);
+    let url: String = format!("https://rawg.io/api/games?page=1&page_size=100&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game_name, api_key);
 
     // Make the request
     let response = match utils::get_request(&url).await {
