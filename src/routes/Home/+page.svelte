@@ -21,10 +21,6 @@
     searchResponse = await invoke('games_list', {gameName: game_name});
   }
 
-  function showDetails(slug: string) {
-    invoke('game_detail', {game: slug});
-  }
-
 </script>
 
 <main>
@@ -39,11 +35,13 @@
 
     <div class="game-grid">
       {#each searchResponse as item}
-        <div class="game-card" on:click={() => showDetails(item.slug)}>
-          <img class="game-image" src={item.background_image} alt={item.name} />
-          <div class="game-info">
-            <h2 class="game-title">{item.name}</h2>
-          </div>
+        <div class="game-card">
+          <a href="/Game?id={item.id}">
+            <img class="game-image" src={item.background_image} alt={item.name} />
+            <div class="game-info">
+              <h2 class="game-title">{item.name}</h2>
+            </div>
+          </a>
         </div>
       {/each}
     </div>

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { invoke } from "@tauri-apps/api/tauri";
 </script>
 
 <div class="app-layout">
