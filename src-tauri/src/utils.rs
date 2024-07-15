@@ -23,7 +23,7 @@ pub async fn get_api_key() -> String {
 
     // Retrieve the API_KEY from the .env file
     dotenv().ok();
-    let api_key = env::var("API_KEY").expect("API_KEY must be set");
+    let api_key = env::var("API_KEY").expect("API_KEY must be set!!!");
     api_key
 }
 

@@ -3,13 +3,26 @@
   import { invoke } from '@tauri-apps/api/tauri';
   import { onMount } from 'svelte';
 
-  async function get_api_key() {
-    return await invoke('get_api_key');
+  // At the start of the page, we will call the get_api_key_invoke function
+  // This will return the API key
+  onMount(() => {
+    get_api_key_invoke();
+  });
+
+  // Function used to get the API key
+  async function get_api_key_invoke() {
+    api_key = await invoke('get_api_key');
   }
 
-  async function set_api_key(api_key: string) {
-    return await invoke('set_api_key', {apiKey: api_key});
+  // Function used to set the API key
+  async function set_api_key_invoke(api_key: string) {
+    await invoke('set_api_key', { apiKey: api_key });
+    await get_api_key_invoke();
   }
+
+  // api_key variable binded to the input field of the API key
+  let api_key = '';
+
 </script>
 
 <main>
@@ -21,13 +34,11 @@
     <h1>Settings</h1>
 
     <!-- API Key Input -->
-    <div>
-      <label for="api-key">API Key:</label>
-      <input type="text" id="api-key" placeholder="Enter your API key" />
-    </div>
+    <input type="text" placeholder="API Key" bind:value={api_key} />
+
 
     <!-- Save button -->
-    <button>Save</button>
+    <button on:click={() => set_api_key_invoke(api_key)}>Save</button>
 
   </div>
 </main>
