@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod utils;
-use serde_json::{json, Value};
+use serde_json::json;
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
 #[tauri::command]
@@ -96,6 +96,18 @@ async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
     Ok(game)
 }
 
+/// Set and get the API key
+#[tauri::command]
+async fn set_api_key(api_key: &str) -> Result<(), String> {
+    utils::set_api_key(api_key).await;
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_api_key() -> Result<String, String > {
+    let api_key = utils::get_api_key().await;
+    Ok(api_key)
+}
 
 /*
 #[tokio::main]
@@ -111,7 +123,7 @@ async fn main() {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![games_list, game_details])
+        .invoke_handler(tauri::generate_handler![games_list, game_details, set_api_key, get_api_key])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
