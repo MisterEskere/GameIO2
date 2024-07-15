@@ -11,3 +11,5 @@ vite.config.ts.timestamp-*
 
 # tmp.html file
 tmp.html
+
+.vscode
