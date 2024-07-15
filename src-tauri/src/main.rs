@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod utils;
+
 use serde_json::json;
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
@@ -122,14 +123,22 @@ async fn get_api_key() -> Result<String, String> {
 /*
 #[tokio::main]
 async fn main() {
-    // test the games_list function
-    let games = games_list("").await.unwrap();
-    println!("{:?}", games);
+    // test the get_api_key function
+    let api_key = get_api_key().await.unwrap();
+    println!("API_KEY: {}", api_key);
 
-    let game = game_details(23598).await.unwrap();
-    println!("{:?}", game);
+    // test the set_api_key function
+    let result = set_api_key("YOUR_API_KEY").await;
+    match result {
+        Ok(_) => println!("API_KEY set successfully"),
+        Err(e) => println!("Error setting API_KEY: {}", e),
+    }
+
+    // test the get_api_key function
+    let api_key = get_api_key().await.unwrap();
+    println!("API_KEY: {}", api_key);
 }
- */
+*/
 
 fn main() {
     tauri::Builder::default()

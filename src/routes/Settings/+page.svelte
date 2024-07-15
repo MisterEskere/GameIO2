@@ -12,6 +12,8 @@
   // Function used to get the API key
   async function get_api_key_invoke() {
     api_key = await invoke('get_api_key');
+    // pop up a message of the API key
+
   }
 
   // Function used to set the API key

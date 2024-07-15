@@ -29,15 +29,16 @@ pub async fn get_api_key() -> Result<String, RusqliteError> {
 }
 
 pub async fn set_api_key(api_key: &str) -> Result<(), RusqliteError> {
-
-    // Attempt to create the database.sqlite file
+    // Ensure the database and table are created
     create_database_sqlite().await?;
 
-    // Attempt to update the database with the new API_KEY
+    // Open a connection to the database
     let conn = rusqlite::Connection::open("database.sqlite")?;
+
+    // Update the API_KEY in the settings table
     conn.execute(
-        "INSERT OR REPLACE INTO settings (api_key) VALUES (?)",
-        [api_key],
+        "UPDATE settings SET api_key = ? WHERE 1",
+        rusqlite::params![api_key],
     )?;
 
     Ok(())
