@@ -29,7 +29,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": ["msi", "dmg"],
+      "targets": ["deb", "appimage", "dmg", "msi"],
       "identifier": "com.gameio2.dev",
       "icon": [
         "icons/32x32.png",
