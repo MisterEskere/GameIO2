@@ -1,43 +1,54 @@
 <script lang="ts">
-  import Menu from '../Menu.svelte';
-  import { invoke } from '@tauri-apps/api/tauri';
-  import { onMount } from 'svelte';
+  import Menu from "../Menu.svelte";
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { onMount } from "svelte";
 
+  // At the start of the page, we will call the games_list_invoke function with an empty string
+  // This will return the popular games
   onMount(() => {
     games_list_invoke("");
   });
 
-  let inputValue = '';
-
-  interface Game {
-    "id": number,
-    "name": string,
-    "slug": string,
-    "background_image": string
-  }
-  let searchResponse: Game[] = [];
-
+  // Functin used to search for games, it will be called when the search button is clicked
   async function games_list_invoke(game_name: string) {
-    searchResponse = await invoke('games_list', {gameName: game_name});
+    search_response = await invoke("games_list", { gameName: game_name });
   }
 
+  // Name of the game to search for binded to the input field of the search bar
+  let game_name = "";
+
+  // Interface for the game object and telated search response for displaying the games
+  interface Game {
+    id: number;
+    name: string;
+    slug: string;
+    background_image: string;
+  }
+  let search_response: Game[] = [];
 </script>
 
 <main>
   <Menu />
-  
+
   <div class="container">
     <h1>Game Search</h1>
 
-    <input type="text" placeholder="Search for a game" bind:value={inputValue} />
-  
-    <button on:click={() => games_list_invoke(inputValue)}>Search</button>
+    <!-- Search bar for searching for games -->
+    <input type="text" placeholder="Search for a game" bind:value={game_name} />
 
+    <!-- Search button to search for games -->
+    <button on:click={() => games_list_invoke(game_name)}>Search</button>
+
+    <!-- Grid for displaying the games -->
     <div class="game-grid">
-      {#each searchResponse as item}
+      {#each search_response as item}
         <div class="game-card">
           <a href="/Game?id={item.id}">
-            <img class="game-image" src={item.background_image} alt={item.name} />
+            <img
+              class="game-image"
+              src={item.background_image}
+              alt={item.name}
+            />
             <div class="game-info">
               <h2 class="game-title">{item.name}</h2>
             </div>
@@ -58,7 +69,8 @@
     padding: 20px;
   }
 
-  input, button {
+  input,
+  button {
     padding: 10px;
     margin: 5px 0;
   }
