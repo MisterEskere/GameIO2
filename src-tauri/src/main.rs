@@ -8,8 +8,11 @@ use serde_json::json;
 #[tauri::command]
 async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 
-    // Retrieve the API_KEY from the .env file
-    let api_key = utils::get_api_key().await;
+    // Retrieve the API_KEY from the .env file, managing the case that get_api_key returns an error
+    let api_key = match utils::get_api_key().await {
+        Ok(key) => key,
+        Err(e) => return Err(format!("Failed to get API key: {}", e)),
+    };
 
     // Create the URL
     let url: String = format!("https://rawg.io/api/games?page=1&page_size=100&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game_name, api_key);
@@ -53,8 +56,11 @@ async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 #[tauri::command]
 async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 
-    // Retrieve the API_KEY from the .env file
-    let api_key = utils::get_api_key().await;
+    // Retrieve the API_KEY from the .env file, managing the case that get_api_key returns an error
+    let api_key = match utils::get_api_key().await {
+        Ok(key) => key,
+        Err(e) => return Err(format!("Failed to get API key: {}", e)),
+    };
 
     // Create the URL
     let url = format!("https://rawg.io/api/games/{}?key={}", game_id, api_key);
@@ -99,14 +105,18 @@ async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 /// Set and get the API key
 #[tauri::command]
 async fn set_api_key(api_key: &str) -> Result<(), String> {
-    utils::set_api_key(api_key).await;
-    Ok(())
+    match utils::set_api_key(api_key).await {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e.to_string()),
+    }
 }
 
 #[tauri::command]
-async fn get_api_key() -> Result<String, String > {
-    let api_key = utils::get_api_key().await;
-    Ok(api_key)
+async fn get_api_key() -> Result<String, String> {
+    match utils::get_api_key().await {
+        Ok(api_key) => Ok(api_key),
+        Err(e) => Err(format!("Failed to get API key: {}", e)),
+    }
 }
 
 /*
