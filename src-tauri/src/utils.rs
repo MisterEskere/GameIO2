@@ -61,6 +61,12 @@ async fn create_database_sqlite() -> Result<(), RusqliteError> {
             )",
             [],
         )?;
+
+        // Insert default API key value
+        conn.execute(
+            "INSERT INTO settings (api_key) VALUES (?1)",
+            &[&"YOUR_API_KEY"],
+        )?;
     }
     Ok(())
 }

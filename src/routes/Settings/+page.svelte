@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dialog } from '@tauri-apps/api';
   import Menu from '../Menu.svelte';
   import { invoke } from '@tauri-apps/api/tauri';
   import { onMount } from 'svelte';
@@ -12,8 +13,6 @@
   // Function used to get the API key
   async function get_api_key_invoke() {
     api_key = await invoke('get_api_key');
-    // pop up a message of the API key
-
   }
 
   // Function used to set the API key
