@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod utils;
+mod scrapers;
 
 use serde_json::json;
 use librqbit::*;
@@ -119,29 +120,25 @@ async fn get_api_key() -> Result<String, String> {
     }
 }
 
-/*
-fn main() {
 
-    // get the current path
-    let current_path = std::env::current_dir().unwrap();
-    let current_path = current_path.to_str().unwrap();
 
-    tokio_test::block_on(async {
-        let session = Session::new(current_path.into()).await.unwrap();
-        let managed_torrent_handle = session.add_torrent(
-           AddTorrent::from_url("magnet:?xt=urn:btih:F4232511728CEC01EC5E6B4F6C16A53ED299E005&dn=Mushoku+Tensei%3A+Jobless+Reincarnation+Quest+of+Memories+%28v1.0.3+%2B+Windows+7+Fix%2C+MULTi3%29+%5BFitGirl+Repack%5D&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=http%3A%2F%2Ftracker.gbitt.info%3A80%2Fannounce&tr=http%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.theoks.net%3A6969%2Fannounce&tr=https%3A%2F%2Ftracker.tamersunion.org%3A443%2Fannounce&tr=http%3A%2F%2Fopen.acgnxtracker.com%3A80%2Fannounce&tr=http%3A%2F%2Fopen.acgtracker.com%3A1096%2Fannounce&tr=http%3A%2F%2Ftracker.bt4g.com%3A2095%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce"),
-           None // options
-        ).await.unwrap().into_handle().unwrap();
-        managed_torrent_handle.wait_until_completed().await.unwrap();
-    })
+#[tokio::main]
+async fn main() {
+    let name = "cyberpunk";
 
+    // Now you can await the async function
+    if let Err(e) = scrapers::download_html(name).await {
+        eprintln!("Failed to download HTML: {}", e);
+    } else if let Ok(html) = scrapers::download_html(name).await {
+        println!("{}", html);   
+    }
 }
-*/
 
-
+/*
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![games_list, game_details, set_api_key, get_api_key])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+*/
