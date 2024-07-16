@@ -126,12 +126,17 @@ async fn get_api_key() -> Result<String, String> {
 async fn main() {
     let name = "cyberpunk";
 
-    // Now you can await the async function
-    if let Err(e) = scrapers::get_torrents(name).await {
-        eprintln!("Failed to download HTML: {}", e);
-    } else if let Ok(html) = scrapers::get_torrents(name).await {
-        println!("{:?}", html);
-    }
+    // Get the list of torrents
+    let torrents = scrapers::get_torrents(name).await.unwrap();
+    println!("Torrents: {:?}", torrents);
+
+    // wait 5 seconds
+    std::thread::sleep(std::time::Duration::from_secs(5));
+
+    // get the magnet link of the first torrent
+    let magnet_link = scrapers::get_magnet_link(&torrents[0].1).await.unwrap();
+
+    println!("Magnet link: {}", magnet_link);
 }
 
 /*

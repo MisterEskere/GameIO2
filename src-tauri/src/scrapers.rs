@@ -16,6 +16,7 @@ lazy_static! {
         .expect("Failed to build client");
 }
 
+const TRUSTED_UPLOADERS: [&str; 8] = ["0xEMPRESS", "anadius", "DODI", "FitGirl", "JohnCena141", "KaOsKrew", "s7on3r", "TinyRepacks"];
 
 pub async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)> , Error> {
 
@@ -25,44 +26,51 @@ pub async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)> , Err
     // Get the HTML content of the page
     let html_content = get_page_html(&url).await?;
 
-    // Select the first column of the table
-    let selector = scraper::Selector::parse("td.coll-1").unwrap();
+    // Extract all the <tr> elements of the html
+    let selector = scraper::Selector
+        ::parse("tr").unwrap();
 
     // Create the result vector
     let mut torrents_pages: Vec<(String, String)> = Vec::new();
 
-    // Iterate over the elements for each torrent found
+ 
+    // Iterate over all the <tr> elements
     for element in html_content.select(&selector) {
+        // Bind the result of `select` to a variable to extend its lifetime
+        let ths = element.select(&scraper::Selector::parse("th").unwrap()).collect::<Vec<_>>();
+    
+        println!("{:?}", ths);
+    
+        // Since `ths` is now a Vec, we can directly use it without cloning
+        let uploader = ths.get(5).unwrap().text().collect::<Vec<_>>().join("");
+        if !TRUSTED_UPLOADERS.contains(&&*uploader) {
+            continue;
+        }
 
-        // get the name of the torrent
-        let name = element.text().collect::<Vec<_>>().join("");
+        // get the name of the torrent, text of the 1st th element
+        let name = ths.get(0).unwrap().text().collect::<Vec<_>>().join("");
 
-        // get the page of the torrent's magnet link
-        let href = element.select(&scraper::Selector
-            ::parse("a").unwrap())
-            .nth(1)
-            .unwrap()
-            .value()
-            .attr("href")
-            .unwrap();
+        // get the href of the 1st th element
+        let href = ths.get(0).unwrap().select(&scraper::Selector::parse("a").unwrap()).next().unwrap().value().attr("href").unwrap();
+        let href = format!("https://1337x.to{}", href);
 
         // push the name and the href to the result vector
-        torrents_pages.push((name, href.to_string()));
+        torrents_pages.push((name, href));
     }
 
     // Return the result vector
     Ok(torrents_pages)
 }
 
-async fn get_magnet_link(url: &str) -> Result<String, Error> {
+pub async fn get_magnet_link(url: &str) -> Result<String, Error> {
 
     // Get the HTML content of the page
     let html_content = get_page_html(url).await?;
 
-    // Select the magnet link
-    let selector = scraper::Selector::parse("a").unwrap();
-    let magnet_link = html_content.select(&selector)
-        .nth(1)
+    // Select the magnet link, get the href of the <a> with the id "openPopup"
+    let magnet_link = html_content.select(&scraper::Selector
+        ::parse("a#openPopup").unwrap())
+        .next()
         .unwrap()
         .value()
         .attr("href")
