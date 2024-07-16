@@ -27,7 +27,8 @@ async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
     };
 
     // Of the response, extract the "next" field TODO da implementare
-    let next = response["next"].as_str().unwrap();
+    // let next = response["next"].as_str().unwrap()?;
+    
 
     // Of the response, extract the "results" list
     let results = response["results"].as_array().unwrap();

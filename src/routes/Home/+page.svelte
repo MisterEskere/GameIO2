@@ -2,6 +2,21 @@
   import Menu from "../Menu.svelte";
   import { invoke } from "@tauri-apps/api/tauri";
   import { onMount } from "svelte";
+  import { writable } from 'svelte/store';
+
+  // Interface for the game object and telated search response for displaying the games
+  interface Game {
+    id: number;
+    name: string;
+    slug: string;
+    background_image: string;
+  }
+
+  // Name of the game to search for binded to the input field of the search bar
+  let game_name = "";
+
+  // Assuming search_response is a Svelte store
+  let search_response = writable<Game[]>([]);
 
   // At the start of the page, we will call the games_list_invoke function with an empty string
   // This will return the popular games
@@ -11,20 +26,11 @@
 
   // Functin used to search for games, it will be called when the search button is clicked
   async function games_list_invoke(game_name: string) {
-    search_response = await invoke("games_list", { gameName: game_name });
+    let search_response_list = await invoke("games_list", { gameName: game_name }) as Game[];
+    search_response.set(search_response_list);
   }
 
-  // Name of the game to search for binded to the input field of the search bar
-  let game_name = "";
-
-  // Interface for the game object and telated search response for displaying the games
-  interface Game {
-    id: number;
-    name: string;
-    slug: string;
-    background_image: string;
-  }
-  let search_response: Game[] = [];
+  // Update game
 </script>
 
 <main>
@@ -41,14 +47,10 @@
 
     <!-- Grid for displaying the games -->
     <div class="game-grid">
-      {#each search_response as item}
+      {#each $search_response as item} <!-- Note the $ sign to access store value -->
         <div class="game-card">
           <a href="/Game?id={item.id}">
-            <img
-              class="game-image"
-              src={item.background_image}
-              alt={item.name}
-            />
+            <img class="game-image" src={item.background_image} alt={item.name} /> 
             <div class="game-info">
               <h2 class="game-title">{item.name}</h2>
             </div>
