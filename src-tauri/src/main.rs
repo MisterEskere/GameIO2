@@ -127,10 +127,10 @@ async fn main() {
     let name = "cyberpunk";
 
     // Now you can await the async function
-    if let Err(e) = scrapers::download_html(name).await {
+    if let Err(e) = scrapers::get_torrents(name).await {
         eprintln!("Failed to download HTML: {}", e);
-    } else if let Ok(html) = scrapers::download_html(name).await {
-        println!("{}", html);   
+    } else if let Ok(html) = scrapers::get_torrents(name).await {
+        println!("{:?}", html);
     }
 }
 
