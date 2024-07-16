@@ -4,6 +4,8 @@
 mod utils;
 
 use serde_json::json;
+use librqbit::*;
+use tokio::runtime::Runtime;
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
 #[tauri::command]
@@ -77,22 +79,18 @@ async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
     let id = response["id"].as_i64().unwrap();
     let slug = response["slug"].as_str().unwrap();
     let name = response["name"].as_str().unwrap();
-    let name_original = response["name_original"].as_str().unwrap();
     let description = response["description"].as_str().unwrap();
-    let metacritic = response["metacritic"].as_i64().unwrap();
     let background_image = response["background_image"].as_str().unwrap();
     let background_image_additional = response["background_image_additional"].as_str().unwrap();
     let released = response["released"].as_str().unwrap();
     let genres = response["genres"].as_array().unwrap();
 
     // make a JSON object with the extracted fields
-    let game = json!({
+    let game: serde_json::Value = json!({
         "id": id,
         "slug": slug,
         "name": name,
-        "name_original": name_original,
         "description": description,
-        "metacritic": metacritic,
         "background_image": background_image,
         "background_image_additional": background_image_additional,
         "released": released,
@@ -121,24 +119,24 @@ async fn get_api_key() -> Result<String, String> {
 }
 
 /*
-#[tokio::main]
-async fn main() {
-    // test the get_api_key function
-    let api_key = get_api_key().await.unwrap();
-    println!("API_KEY: {}", api_key);
+fn main() {
 
-    // test the set_api_key function
-    let result = set_api_key("YOUR_API_KEY").await;
-    match result {
-        Ok(_) => println!("API_KEY set successfully"),
-        Err(e) => println!("Error setting API_KEY: {}", e),
-    }
+    // get the current path
+    let current_path = std::env::current_dir().unwrap();
+    let current_path = current_path.to_str().unwrap();
 
-    // test the get_api_key function
-    let api_key = get_api_key().await.unwrap();
-    println!("API_KEY: {}", api_key);
+    tokio_test::block_on(async {
+        let session = Session::new(current_path.into()).await.unwrap();
+        let managed_torrent_handle = session.add_torrent(
+           AddTorrent::from_url("magnet:?xt=urn:btih:F4232511728CEC01EC5E6B4F6C16A53ED299E005&dn=Mushoku+Tensei%3A+Jobless+Reincarnation+Quest+of+Memories+%28v1.0.3+%2B+Windows+7+Fix%2C+MULTi3%29+%5BFitGirl+Repack%5D&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=http%3A%2F%2Ftracker.gbitt.info%3A80%2Fannounce&tr=http%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.ccp.ovh%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.theoks.net%3A6969%2Fannounce&tr=https%3A%2F%2Ftracker.tamersunion.org%3A443%2Fannounce&tr=http%3A%2F%2Fopen.acgnxtracker.com%3A80%2Fannounce&tr=http%3A%2F%2Fopen.acgtracker.com%3A1096%2Fannounce&tr=http%3A%2F%2Ftracker.bt4g.com%3A2095%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=http%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce"),
+           None // options
+        ).await.unwrap().into_handle().unwrap();
+        managed_torrent_handle.wait_until_completed().await.unwrap();
+    })
+
 }
 */
+
 
 fn main() {
     tauri::Builder::default()
