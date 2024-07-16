@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Menu from "../Menu.svelte";
   import { onMount } from 'svelte';
   import { invoke } from "@tauri-apps/api/tauri";
 
@@ -49,6 +50,8 @@
 </script>
 
 <main>
+  <Menu />
+
   <div class="container">
     <div class="game-header">
       <h1>{game_details.name}</h1>
