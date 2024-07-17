@@ -54,26 +54,7 @@
 </script>
 
 <style>
-  .download-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 50;
-  }
+
 </style>
 
 <main>
@@ -95,9 +76,9 @@
     </div>
     <button on:click={toggleDownload}>Download</button>
     {#if showDownload}
-      <div class="overlay" on:click={toggleDownload}></div>
+    <button class="overlay" on:click={toggleDownload} type="button">Download</button>
       <div class="download-modal">
-        <Download />
+        <Download slug={game_details.slug} />
       </div>
     {/if}
   </div>

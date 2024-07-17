@@ -120,6 +120,7 @@ async fn get_api_key() -> Result<String, String> {
 
 #[tauri::command]
 async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> {
+    print!("Getting torrents for game: {}", game_name);
     let torrents = scrapers::get_torrents(game_name).await.unwrap();
     Ok(torrents)
 }
