@@ -5,8 +5,6 @@ mod utils;
 mod scrapers;
 
 use serde_json::json;
-use librqbit::*;
-use tokio::runtime::Runtime;
 
 /// Makes a GET request to "https://rawg.io/api/games?page=1&page_size=10&search=NAME_OF_GAME&parent_platforms=1,6,5&stores=1,5,11"
 #[tauri::command]
@@ -120,8 +118,19 @@ async fn get_api_key() -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> {
+    let torrents = scrapers::get_torrents(game_name).await.unwrap();
+    Ok(torrents)
+}
 
+#[tauri::command]
+async fn get_magnet_link(url: &str) -> Result<String, String> {
+    let magnet_link = scrapers::get_magnet_link(url).await.unwrap();
+    Ok(magnet_link)
+}
 
+/*
 #[tokio::main]
 async fn main() {
     let name = "cyberpunk";
@@ -138,12 +147,12 @@ async fn main() {
 
     println!("Magnet link: {}", magnet_link);
 }
+*/
 
-/*
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![games_list, game_details, set_api_key, get_api_key])
+        .invoke_handler(tauri::generate_handler![games_list, game_details, set_api_key, get_api_key, get_torrents, get_magnet_link])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-*/

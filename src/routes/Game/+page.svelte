@@ -2,6 +2,7 @@
   import Menu from "../Menu.svelte";
   import { onMount } from 'svelte';
   import { invoke } from "@tauri-apps/api/tauri";
+  import Download from "../Download.svelte";
 
   onMount(() => {
     const idString = new URLSearchParams(window.location.search).get('id');
@@ -9,13 +10,12 @@
     if (id) {
       game_details_invoke(id);
     }
-});
+  });
 
   async function game_details_invoke(game_id: number) {
     game_details = await invoke("game_details", { gameId: game_id });
   }
 
-  // Interface for the game object and telated search response for displaying the game details
   interface Game {
       "id": number,
       "slug": string,
@@ -27,7 +27,6 @@
       "genres": genres[],
   }
 
-  // Interface for the genres object
   interface genres {
       "id": number,
       "name": string,
@@ -47,7 +46,35 @@
       "genres": []
   };
 
+  let showDownload = false;
+
+  function toggleDownload() {
+    showDownload = !showDownload;
+  }
 </script>
+
+<style>
+  .download-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 50;
+  }
+</style>
 
 <main>
   <Menu />
@@ -66,45 +93,12 @@
         <div class="genre-badge">{genre.name}</div>
       {/each}
     </div>
+    <button on:click={toggleDownload}>Download</button>
+    {#if showDownload}
+      <div class="overlay" on:click={toggleDownload}></div>
+      <div class="download-modal">
+        <Download />
+      </div>
+    {/if}
   </div>
 </main>
-
-<style>
-  .container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
-  }
-  .game-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .game-header img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-  }
-  .game-released {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #888;
-  }
-  .game-description {
-    margin-top: 20px;
-  }
-  .game-genres {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  .genre-badge {
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 14px;
-  }
-</style>
