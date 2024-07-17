@@ -1118,8 +1118,10 @@ dependencies = [
 name = "gameio2"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "lazy_static",
  "librqbit",
+ "once_cell",
  "reqwest 0.12.5",
  "rusqlite",
  "scraper",
@@ -1130,6 +1132,7 @@ dependencies = [
  "tauri-build",
  "tokio",
  "tokio-test",
+ "tracing",
 ]
 
 [[package]]
