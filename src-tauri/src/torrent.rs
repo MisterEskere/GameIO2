@@ -7,84 +7,11 @@ use anyhow::Context;
 use librqbit::ManagedTorrent;
 use librqbit::{AddTorrent, AddTorrentOptions, AddTorrentResponse, Session};
 use once_cell::sync::Lazy;
-use serde_json::Value;
 use std::sync::{Arc, Mutex};
 
 // Define the global state for torrent handles
 static HANDLES: Lazy<Arc<Mutex<Vec<Arc<ManagedTorrent>>>>> =
     Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
-
-/// Function that will start all the torrents in the DB. It will be called at the beginning of the program.
-/// It will recive the list of all the torrents from the database and start them.
-/// It will be called at the beginning of the program.
-///
-/// # Arguments
-/// /// ```json
-/// [
-///     {
-///         "name": "Zelda",
-///         "link": "magnet:?xt=urn:btih:...",
-///         "uploader": "Noidea"
-///     },
-///     {
-///         "name": "Mario",
-///         "link": "magnet:?xt=urn:btih:...",
-///         "uploader": "Noidea"
-///     }
-/// ]
-/// ```
-///
-/// # Example
-/// ```rust
-/// start_all_torrents().await;
-/// ```
-///
-/// # Returns
-/// ```bool
-/// true
-/// ```
-///
-
-pub async fn start_torrents(
-    torrents: Vec<Value>,
-    output_folder: &str,
-) -> Result<bool, anyhow::Error> {
-
-    // Create the session
-    let session = Session::new(output_folder.into())
-        .await
-        .context("error creating session")?;
-
-    // Run trough all the torrents
-    for torrent in torrents {
-
-        // Get the magnet link of the torrent
-        let magnet_link = torrent["link"].as_str().unwrap();
-
-        // Add the torrent to the session
-        let handle: Arc<ManagedTorrent> = match session
-            .add_torrent(
-                AddTorrent::from_url(magnet_link),
-                Some(AddTorrentOptions {
-                    overwrite: true,
-                    ..Default::default()
-                }),
-            )
-            .await
-            .context("error adding torrent")?
-        {
-            AddTorrentResponse::Added(_, handle) => handle,
-            _ => unreachable!(),
-        };
-
-        // Safely add the handle to the global list
-        let mut handles = HANDLES.lock().unwrap();
-        handles.push(handle);
-    }
-
-    // Return true
-    Ok(true)
-}
 
 /// Function to download a torrent from a magnet link.
 /// It will take the directory where the torrent will be downloaded and the magnet link.
@@ -125,15 +52,23 @@ pub async fn download_torrent(directory: &str, magnet_link: &str) -> Result<(), 
         _ => unreachable!(),
     };
 
+    // Clone the handle
+    let handle_clone: Arc<ManagedTorrent> = handle.clone();
+
     // Safely add the handle to the global list
     let mut handles = HANDLES.lock().unwrap();
-    handles.push(handle);
+    handles.push(handle_clone);
+
+    // Wait for the handle to finish
+    handle.wait_until_completed().await?;
+
+    // Delete the session
+    drop(session);
 
     // Return the handle
     Ok(())
 
 }
-
 
 /// Function to get the status of all the torrents.
 /// It will return a vector with the status of all the torrents as strings.

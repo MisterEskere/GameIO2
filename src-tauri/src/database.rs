@@ -11,6 +11,7 @@ use serde_json::{json, Value};
 ///    - Downloads:
 ///       - name TEXT (name of the torrent)
 ///       - game TEXT (name of the game)
+///       - path TEXT (path to the game)
 ///       - link TEXT (magnet link of the torrent)
 ///       - uploader TEXT (name of the uploader, will be used to search the install instructions)
 ///
@@ -20,7 +21,7 @@ use serde_json::{json, Value};
 ///       - executable TEXT (path to the executable)
 ///
 
-pub async fn create_database_sqlite() -> Result<(), RusqliteError> {
+pub fn create_database_sqlite() -> Result<(), RusqliteError> {
     // Check if the database file already exists if yes return
     if std::path::Path::new("database.sqlite").exists() {
         return Ok(());
@@ -79,8 +80,6 @@ pub async fn create_database_sqlite() -> Result<(), RusqliteError> {
 /// ]
 ///
 pub async fn get_downloads() -> Result<Vec<Value>, RusqliteError> {
-    // Attempt to create the database.sqlite file
-    create_database_sqlite().await?;
 
     // Attempt to query the database for the downloads
     let conn = rusqlite::Connection::open("database.sqlite")?;
@@ -125,8 +124,6 @@ pub async fn add_download(
     link: &str,
     uploader: &str,
 ) -> Result<bool, RusqliteError> {
-    // Attempt to create the database.sqlite file
-    create_database_sqlite().await?;
 
     // Attempt to open a connection to the database
     let conn = rusqlite::Connection::open("database.sqlite")?;
@@ -159,8 +156,6 @@ pub async fn add_download(
 ///
 
 pub async fn remove_download(name: &str) -> Result<bool, RusqliteError> {
-    // Attempt to create the database.sqlite file
-    create_database_sqlite().await?;
 
     // Attempt to open a connection to the database
     let conn = rusqlite::Connection::open("database.sqlite")?;

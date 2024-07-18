@@ -1,8 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod utils;
+mod env;
 mod scrapers;
+mod torrent;
+mod database;
 
 use serde_json::json;
 
@@ -11,7 +13,7 @@ use serde_json::json;
 async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 
     // Retrieve the API_KEY from the .env file, managing the case that get_api_key returns an error
-    let api_key = match utils::get_api_key().await {
+    let api_key = match env::get_api_key().await {
         Ok(key) => key,
         Err(e) => return Err(format!("Failed to get API key: {}", e)),
     };
@@ -20,7 +22,7 @@ async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
     let url: String = format!("https://rawg.io/api/games?page=1&page_size=100&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game_name, api_key);
 
     // Make the request
-    let response = match utils::get_request(&url).await {
+    let response = match env::get_request(&url).await {
         Ok(resp) => resp,
         Err(e) => return Err(e.to_string()), // Convert the error to a String here
     };
@@ -60,7 +62,7 @@ async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 
     // Retrieve the API_KEY from the .env file, managing the case that get_api_key returns an error
-    let api_key = match utils::get_api_key().await {
+    let api_key = match env::get_api_key().await {
         Ok(key) => key,
         Err(e) => return Err(format!("Failed to get API key: {}", e)),
     };
@@ -69,7 +71,7 @@ async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
     let url = format!("https://rawg.io/api/games/{}?key={}", game_id, api_key);
 
     // Make the request
-    let response = match utils::get_request(&url).await {
+    let response = match env::get_request(&url).await {
         Ok(resp) => resp,
         Err(e) => return Err(e.to_string()), // Convert the error to a String here
     };
@@ -104,7 +106,7 @@ async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 /// Set and get the API key
 #[tauri::command]
 async fn set_api_key(api_key: &str) -> Result<(), String> {
-    match utils::set_api_key(api_key).await {
+    match env::set_api_key(api_key).await {
         Ok(_) => Ok(()),
         Err(e) => Err(e.to_string()),
     }
@@ -112,7 +114,7 @@ async fn set_api_key(api_key: &str) -> Result<(), String> {
 
 #[tauri::command]
 async fn get_api_key() -> Result<String, String> {
-    match utils::get_api_key().await {
+    match env::get_api_key().await {
         Ok(api_key) => Ok(api_key),
         Err(e) => Err(format!("Failed to get API key: {}", e)),
     }
@@ -120,15 +122,17 @@ async fn get_api_key() -> Result<String, String> {
 
 #[tauri::command]
 async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> {
-    print!("Getting torrents for game: {}", game_name);
     let torrents = scrapers::get_torrents(game_name).await.unwrap();
     Ok(torrents)
 }
 
 #[tauri::command]
-async fn get_magnet_link(url: &str) -> Result<String, String> {
-    let magnet_link = scrapers::get_magnet_link(url).await.unwrap();
-    Ok(magnet_link)
+async fn download_torrent(url: &str) -> Result<String, String> {
+    let magnet_link: String = scrapers::get_magnet_link(url).await.unwrap();
+
+    let handle = torrent::download_torrent("downloads", &magnet_link).await.unwrap();
+
+    Ok(handle().to_string())
 }
 
 /*
@@ -150,8 +154,39 @@ async fn main() {
 }
 */
 
+/// This function will be used to start all the torrents previously started. 
+/// This will be called at the beginning of the application.
+async fn start_torrents() {
+    let torrents = database::get_downloads().await.unwrap();
+
+    for torrent in torrents {
+        let magnet_link = torrent["link"].as_str().unwrap();
+        torrent::download_torrent("downloads", magnet_link).await.unwrap();
+    }
+}
+
+/// This function will be used to start a new torrent download.
+/// It will take the magnet link of the torrent and start the download.
+#[tauri::command]
+async fn start_torrent(magnet_link: &str) {
+
+    // Retrive the downloads folder from the .env file
+
+
+    // Start the torrent download
+    torrent::download_torrent("downloads", magnet_link).await.unwrap();
+    
+}
 
 fn main() {
+
+    // Attempt to create the database.sqlite file
+    database::create_database_sqlite();
+
+    // Call the start_torrents function
+    tokio::runtime::Runtime::new().unwrap().block_on(start_torrents());
+
+    // Run the tauri application
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![games_list, game_details, set_api_key, get_api_key, get_torrents, get_magnet_link])
         .run(tauri::generate_context!())
