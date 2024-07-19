@@ -43,7 +43,7 @@ pub async fn set_download_path(download_path: &str) -> Result<(), std::io::Error
 }
 
 /// Function to create the .ENV file with the API_KEY and the DOWNLOAD_PATH.
-fn create_env_file() -> Result<(), std::io::Error> {
+pub fn create_env_file() -> Result<(), std::io::Error> {
     // Attempt to create the .env file, in case it already exists exit early
     let mut file = std::fs::OpenOptions::new()
         .write(true)

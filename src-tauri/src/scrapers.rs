@@ -1,3 +1,7 @@
+/*
+This file will be used to scrape the 1337x.to website and its magnet links.
+*/
+
 use reqwest::{Client, Error, ClientBuilder};
 use std::net::{SocketAddr, IpAddr, Ipv4Addr};
 use scraper::Html;
@@ -15,7 +19,6 @@ lazy_static! {
         .build()
         .expect("Failed to build client");
 }
-
 
 pub async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)> , Error> {
 
