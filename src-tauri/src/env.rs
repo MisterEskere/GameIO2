@@ -2,6 +2,7 @@ use serde_json::Value;
 use std::io::Write;
 use std::env::VarError;
 
+
 /// Function to make a GET request to a URL and return the JSON response.
 pub async fn get_request(url: &str) -> Result<Value, reqwest::Error> {
     let client = reqwest::Client::new();
@@ -31,7 +32,7 @@ pub async fn get_download_path() -> Result<String, VarError> {
     Ok(download_path)
 }
 
-/// Function to set tje DOWNLOAD_PATH in the environment file.
+/// Function to set the DOWNLOAD_PATH in the environment file.
 pub async fn set_download_path(download_path: &str) -> Result<(), std::io::Error> {
     dotenv::dotenv().ok();
 
@@ -53,6 +54,9 @@ fn create_env_file() -> Result<(), std::io::Error> {
 
     // Get the API_KEY from the environment
     let api_key = std::env::var("API_KEY").unwrap();
+
+    // Get the default download path from the user's directory
+    let download_path = dirs::download_dir().unwrap().to_str().unwrap();
 
     // Write the API_KEY and DOWNLOAD_PATH to the file
     file.write_all(b"API_KEY=YOUR_API_KEY\nDOWNLOAD_PATH=YOUR_DOWNLOAD_PATH")?;
