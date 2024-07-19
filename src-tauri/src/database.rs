@@ -21,17 +21,20 @@ use serde_json::{json, Value};
 ///       - executable TEXT (path to the executable)
 ///
 
-pub fn create_database_sqlite() -> Result<(), RusqliteError> {
+pub fn create_database_sqlite() {
     // Check if the database file already exists if yes return
     if std::path::Path::new("database.sqlite").exists() {
-        return Ok(());
+        return;
     }
 
     // Attempt to create the database file
-    let conn = rusqlite::Connection::open("database.sqlite")?;
+    let conn = match rusqlite::Connection::open("database.sqlite") {
+        Ok(conn) => conn,
+        Err(_) => return,
+    };
 
     // Attempt to create the downloads table
-    conn.execute(
+    if conn.execute(
         "CREATE TABLE IF NOT EXISTS downloads (
             name TEXT,
             game TEXT,
@@ -39,10 +42,12 @@ pub fn create_database_sqlite() -> Result<(), RusqliteError> {
             uploader TEXT
         )",
         [],
-    )?;
+    ).is_err() {
+        return;
+    }
 
     // Attempt to create the library table
-    conn.execute(
+    if conn.execute(
         "CREATE TABLE IF NOT EXISTS library (
             name TEXT,
             game TEXT,
@@ -50,9 +55,9 @@ pub fn create_database_sqlite() -> Result<(), RusqliteError> {
             executable TEXT
         )",
         [],
-    )?;
-
-    Ok(())
+    ).is_err() {
+        return;
+    }
 }
 
 /// Function to get the all the downloads from the database.

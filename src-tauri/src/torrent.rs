@@ -6,7 +6,10 @@ It will allow to add torrents, to get the status of all torrents and to start th
 use librqbit::ManagedTorrent;
 use librqbit::{AddTorrent, AddTorrentOptions, AddTorrentResponse, Session};
 use once_cell::sync::Lazy;
+use tauri::api::dir;
 use std::sync::{Arc, Mutex};
+
+use std::time::Duration;
 
 // Define the global state for torrent handles
 static HANDLES: Lazy<Arc<Mutex<Vec<Arc<ManagedTorrent>>>>> =
@@ -28,6 +31,7 @@ static HANDLES: Lazy<Arc<Mutex<Vec<Arc<ManagedTorrent>>>>> =
 /// ```
 /// 
 pub async fn download_torrent(directory: &str, magnet_link: &str) {
+
     // Create the session
     let session = match Session::new(directory.into()).await {
         Ok(s) => s,
@@ -60,6 +64,19 @@ pub async fn download_torrent(directory: &str, magnet_link: &str) {
         }
     };
 
+    tokio::spawn({
+        let handle = handle.clone();
+        async move {
+            loop {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                let stats = handle.stats();
+                println!("{stats:}");
+            }
+        }
+    }); 
+    handle.wait_until_completed().await.unwrap();
+
+    /*
     // Clone the handle
     let handle_clone: Arc<ManagedTorrent> = handle.clone();
 
@@ -77,6 +94,7 @@ pub async fn download_torrent(directory: &str, magnet_link: &str) {
     if let Err(e) = handle.wait_until_completed().await {
         eprintln!("error waiting for torrent to complete: {:?}", e);
     }
+    */
 
     // Delete the session implicitly by dropping it
     drop(session);

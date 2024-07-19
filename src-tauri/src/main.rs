@@ -84,16 +84,21 @@ async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> 
 #[tauri::command]
 async fn download_torrent(url: &str) -> Result<(), String> {
     
+    // print the URL
+    print!("Downloading torrent from: ");
+    print!("{}", url);
+
     // Get the magnet link of the torrent
     let magnet_link: String = scrapers::get_magnet_link(url).await.unwrap();
-
+    print!("Magnet link: {}", magnet_link);
+    
     // Get the download path
     let download_path = env::get_download_path().await.unwrap();
 
     // Start the torrent download as a new thread
-    thread::spawn(move || {
-        torrent::download_torrent(&download_path, &magnet_link);
-    });
+    
+
+    torrent::download_torrent(&download_path, &magnet_link).await;
 
     Ok(())
 }
@@ -108,25 +113,39 @@ async fn set_downloaded_path(path: &str) -> Result<(), String> {
 }
 /********************************************************************************************************************/
 
-/*
 #[tokio::main]
 async fn main() {
     let name = "cyberpunk";
 
-    // Get the list of torrents
-    let torrents = scrapers::get_torrents(name).await.unwrap();
-    println!("Torrents: {:?}", torrents);
+    // Search for the game
+    let games = games_list(name).await.unwrap();
+    print!("{:?}", games);
 
-    // wait 5 seconds
-    std::thread::sleep(std::time::Duration::from_secs(5));
+    // Get the first game
+    let game = games[0].clone();
+    print!("{:?}", game);
+    let game_id = game["id"].as_i64().unwrap();
 
-    // get the magnet link of the first torrent
-    let magnet_link = scrapers::get_magnet_link(&torrents[0].1).await.unwrap();
+    // Get the details of the game
+    let details = game_details(game_id).await.unwrap();
+    print!("{:?}", details);
 
-    println!("Magnet link: {}", magnet_link);
+    // Get the torrents for the game
+    let torrents = get_torrents(name).await.unwrap();
+    print!("{:?}", torrents);
+
+    // Download the first torrent
+    let url: String = torrents[1].1.clone();
+    download_torrent(&url).await.unwrap();
+    print!("Downloaded torrent");
+
+    // Ger the status of the downloads
+    let status = torrent::get_torrent_statuses().await;
+    print!("{:?}", status);
+
 }
-*/
 
+/*
 fn main() {
 
     // Create the .env file
@@ -150,3 +169,4 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+*/
