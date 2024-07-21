@@ -95,7 +95,8 @@ pub async fn get_downloads() -> Result<Vec<Value>, RusqliteError> {
                 "name": row.get::<_, String>(0)?,
                 "game": row.get::<_, String>(1)?,
                 "link": row.get::<_, String>(2)?,
-                "uploader": row.get::<_, String>(3)?
+                "uploader": row.get::<_, String>(3)?,
+                "path": row.get::<_, String>(4)?
             }))
         })?
         .collect::<Result<Vec<Value>, RusqliteError>>()?;
@@ -112,10 +113,6 @@ pub async fn get_downloads() -> Result<Vec<Value>, RusqliteError> {
 /// - link: &str (magnet link of the torrent)
 /// - uploader: &str (name of the uploader)
 ///
-/// # Example
-/// ```rust
-/// add_download("Zelda", "magnet:?xt=urn:btih:...", "Noidea").await.unwrap();
-/// ```
 ///
 /// # Returns
 /// ```bool
@@ -128,6 +125,7 @@ pub async fn add_download(
     game: &str,
     link: &str,
     uploader: &str,
+    path: &str,
 ) -> Result<bool, RusqliteError> {
 
     // Attempt to open a connection to the database
@@ -135,8 +133,8 @@ pub async fn add_download(
 
     // Attempt to insert the download into the downloads table
     conn.execute(
-        "INSERT INTO downloads (name, game, link, uploader) VALUES (?1, ?2, ?3, ?4)",
-        rusqlite::params![name, game, link, uploader],
+        "INSERT INTO downloads (name, game, link, uploader, path) VALUES (?1, ?2, ?3, ?4, ?5)",
+        rusqlite::params![name, game, link, uploader, path],
     )?;
 
     Ok(true)

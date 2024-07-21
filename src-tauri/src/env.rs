@@ -3,6 +3,7 @@ use std::env::VarError;
 use std::io::Write;
 
 /// Function to make a GET request to a URL and return the JSON response.
+/// It will be used to make requests to the RAWG API.
 pub async fn get_request(url: &str) -> Result<Value, reqwest::Error> {
     let client = reqwest::Client::new();
     let res = client.get(url).send().await?;
@@ -14,6 +15,7 @@ pub async fn get_request(url: &str) -> Result<Value, reqwest::Error> {
 }
 
 /// Function to retrieve the API_KEY from the environment file.
+/// It will be used to make requests to the RAWG API.
 pub async fn get_api_key() -> Result<String, VarError> {
     dotenv::dotenv().ok();
 
@@ -23,6 +25,7 @@ pub async fn get_api_key() -> Result<String, VarError> {
 }
 
 /// Function to retrieve the DOWNLOAD_PATH from the environment file.
+/// It will be used to know where to download the torrents.
 pub async fn get_download_path() -> Result<String, VarError> {
     dotenv::dotenv().ok();
 
@@ -32,6 +35,7 @@ pub async fn get_download_path() -> Result<String, VarError> {
 }
 
 /// Function to set the DOWNLOAD_PATH in the environment file.
+/// It will be used to update the download path in the application.
 pub async fn set_download_path(download_path: &str) -> Result<(), std::io::Error> {
     dotenv::dotenv().ok();
 
@@ -43,6 +47,7 @@ pub async fn set_download_path(download_path: &str) -> Result<(), std::io::Error
 }
 
 /// Function to create the .ENV file with the API_KEY and the DOWNLOAD_PATH.
+/// It will be called at the beginning of the application.
 pub fn create_env_file() -> Result<(), std::io::Error> {
     // Attempt to create the .env file, in case it already exists exit early
     let mut file = std::fs::OpenOptions::new()

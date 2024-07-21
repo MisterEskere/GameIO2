@@ -17,7 +17,7 @@ async fn start_torrents() {
 
     for torrent in torrents {
         let download_path = torrent["path"].as_str().unwrap().to_string(); // Convert to owned String
-        let magnet_link = torrent["link"].as_str().unwrap().to_string(); // Convert to owned String
+        let magnet_link: String = torrent["link"].as_str().unwrap().to_string(); // Convert to owned String
 
         thread::spawn(move || {
             torrent::download_torrent(&download_path, &magnet_link); // Directly use the owned Strings
@@ -82,7 +82,7 @@ async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> 
 /********************************************************************************************************************/
 /// Gets the magnet link of a torrent and downloads it
 #[tauri::command]
-async fn download_torrent(url: &str) -> Result<(), String> {
+async fn download_torrent(name : &str, game: &str, url: &str, uploader: &str) -> Result<(), String> {
     
     // print the URL
     print!("Downloading torrent from: ");
@@ -92,12 +92,17 @@ async fn download_torrent(url: &str) -> Result<(), String> {
     let magnet_link: String = scrapers::get_magnet_link(url).await.unwrap();
     print!("Magnet link: {}", magnet_link);
     
+    // Add the download to the database
+    let name = "Cyberpunk 2077"; // TODO change to the name of the torrent.
+    let game = "Cyberpunk 2077"; // TODO make name dynamic
+    let link = &magnet_link;
+    let uploader = "CODEX"; // TODO change to the uploader of the torrent.
+    let path = env::get_download_path().await.unwrap();
+
     // Get the download path
     let download_path = env::get_download_path().await.unwrap();
 
     // Start the torrent download as a new thread
-    
-
     torrent::download_torrent(&download_path, &magnet_link).await;
 
     Ok(())
@@ -112,7 +117,7 @@ async fn set_downloaded_path(path: &str) -> Result<(), String> {
     Ok(())
 }
 /********************************************************************************************************************/
-
+/*
 #[tokio::main]
 async fn main() {
     let name = "cyberpunk";
@@ -144,9 +149,13 @@ async fn main() {
     print!("{:?}", status);
 
 }
+*/
 
-/*
+
 fn main() {
+
+    // Create the logger
+    env_logger::init();
 
     // Create the .env file
     env::create_env_file().unwrap();
@@ -169,4 +178,3 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-*/
