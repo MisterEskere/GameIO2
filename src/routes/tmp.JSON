@@ -1,0 +1,217 @@
+{
+    "slug": "cyberpunk-2077-phantom-liberty",
+    "name": "Cyberpunk 2077: Phantom Liberty",
+    "playtime": 0,
+    "platforms": [
+        {
+            "platform": {
+                "id": 4,
+                "name": "PC",
+                "slug": "pc"
+            }
+        },
+        {
+            "platform": {
+                "id": 187,
+                "name": "PlayStation 5",
+                "slug": "playstation5"
+            }
+        },
+        {
+            "platform": {
+                "id": 186,
+                "name": "Xbox Series S/X",
+                "slug": "xbox-series-x"
+            }
+        }
+    ],
+    "stores": [
+        {
+            "store": {
+                "id": 1,
+                "name": "Steam",
+                "slug": "steam"
+            }
+        },
+        {
+            "store": {
+                "id": 3,
+                "name": "PlayStation Store",
+                "slug": "playstation-store"
+            }
+        },
+        {
+            "store": {
+                "id": 5,
+                "name": "GOG",
+                "slug": "gog"
+            }
+        }
+    ],
+    "released": "2023-09-26",
+    "tba": false,
+    "background_image": "https://media.rawg.io/media/games/062/06285b425e61623530c5430f20e5d222.jpg",
+    "rating": 4.69,
+    "rating_top": 5,
+    "ratings": [
+        {
+            "id": 5,
+            "title": "exceptional",
+            "count": 180,
+            "percent": 77.59
+        },
+        {
+            "id": 4,
+            "title": "recommended",
+            "count": 43,
+            "percent": 18.53
+        },
+        {
+            "id": 1,
+            "title": "skip",
+            "count": 5,
+            "percent": 2.16
+        },
+        {
+            "id": 3,
+            "title": "meh",
+            "count": 4,
+            "percent": 1.72
+        }
+    ],
+    "ratings_count": 223,
+    "reviews_text_count": 8,
+    "added": 774,
+    "added_by_status": {
+        "yet": 85,
+        "owned": 98,
+        "beaten": 230,
+        "toplay": 304,
+        "dropped": 12,
+        "playing": 45
+    },
+    "metacritic": null,
+    "suggestions_count": 60,
+    "updated": "2024-07-12T08:35:07",
+    "id": 846303,
+    "score": "33.266323",
+    "clip": null,
+    "tags": [
+        {
+            "id": 32,
+            "name": "Sci-fi",
+            "slug": "sci-fi",
+            "language": "eng",
+            "games_count": 19278,
+            "image_background": "https://media.rawg.io/media/games/8e4/8e4de3f54ac659e08a7ba6a2b731682a.jpg"
+        },
+        {
+            "id": 6,
+            "name": "Exploration",
+            "slug": "exploration",
+            "language": "eng",
+            "games_count": 23289,
+            "image_background": "https://media.rawg.io/media/games/9aa/9aa42d16d425fa6f179fc9dc2f763647.jpg"
+        },
+        {
+            "id": 34,
+            "name": "Violent",
+            "slug": "violent",
+            "language": "eng",
+            "games_count": 6722,
+            "image_background": "https://media.rawg.io/media/games/cee/cee577e2097a59b77193fe2bce94667d.jpg"
+        },
+        {
+            "id": 167,
+            "name": "Futuristic",
+            "slug": "futuristic",
+            "language": "eng",
+            "games_count": 5441,
+            "image_background": "https://media.rawg.io/media/games/943/9432de383089b0a427a3cdf3687b2b73.jpg"
+        },
+        {
+            "id": 226,
+            "name": "Cyberpunk",
+            "slug": "cyberpunk",
+            "language": "eng",
+            "games_count": 4570,
+            "image_background": "https://media.rawg.io/media/screenshots/ad4/ad445a12ee46543d4d117f3893041ebf.jpg"
+        }
+    ],
+    "esrb_rating": {
+        "id": 4,
+        "name": "Mature",
+        "slug": "mature",
+        "name_en": "Mature",
+        "name_ru": "С 17 лет"
+    },
+    "user_game": null,
+    "reviews_count": 232,
+    "saturated_color": "0f0f0f",
+    "dominant_color": "0f0f0f",
+    "short_screenshots": [
+        {
+            "id": -1,
+            "image": "https://media.rawg.io/media/games/062/06285b425e61623530c5430f20e5d222.jpg"
+        },
+        {
+            "id": 3551209,
+            "image": "https://media.rawg.io/media/screenshots/80f/80fae78e5c12be23386e1f68786c8b4b.jpg"
+        },
+        {
+            "id": 3551210,
+            "image": "https://media.rawg.io/media/screenshots/078/078cfcc88982199f6e1bc6de24279593.jpg"
+        },
+        {
+            "id": 3551211,
+            "image": "https://media.rawg.io/media/screenshots/da5/da5c912366c9ca2ca282f55ecd3b33c2.jpg"
+        },
+        {
+            "id": 3551212,
+            "image": "https://media.rawg.io/media/screenshots/fc1/fc10d7ec161911a3bb3409cd0599db05.jpg"
+        },
+        {
+            "id": 3551213,
+            "image": "https://media.rawg.io/media/screenshots/1de/1def44eac50c83de5d3a0dffbe52b5f9.jpg"
+        },
+        {
+            "id": 3551214,
+            "image": "https://media.rawg.io/media/screenshots/6cd/6cd9d62ddb5771993d67a565f51c648d.jpg"
+        }
+    ],
+    "parent_platforms": [
+        {
+            "platform": {
+                "id": 1,
+                "name": "PC",
+                "slug": "pc"
+            }
+        },
+        {
+            "platform": {
+                "id": 2,
+                "name": "PlayStation",
+                "slug": "playstation"
+            }
+        },
+        {
+            "platform": {
+                "id": 3,
+                "name": "Xbox",
+                "slug": "xbox"
+            }
+        }
+    ],
+    "genres": [
+        {
+            "id": 2,
+            "name": "Shooter",
+            "slug": "shooter"
+        },
+        {
+            "id": 4,
+            "name": "Action",
+            "slug": "action"
+        }
+    ]
+}

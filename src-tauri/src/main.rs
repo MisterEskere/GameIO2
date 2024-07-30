@@ -98,6 +98,7 @@ async fn download_torrent(name : &str, game: &str, url: &str, uploader: &str) ->
     let link = &magnet_link;
     let uploader = "CODEX"; // TODO change to the uploader of the torrent.
     let path = env::get_download_path().await.unwrap();
+    database::add_download(name, game, &link, uploader, &path).await.unwrap();
 
     // Get the download path
     let download_path = env::get_download_path().await.unwrap();
@@ -117,41 +118,22 @@ async fn set_downloaded_path(path: &str) -> Result<(), String> {
     Ok(())
 }
 /********************************************************************************************************************/
-/*
+
 #[tokio::main]
 async fn main() {
     let name = "cyberpunk";
 
-    // Search for the game
-    let games = games_list(name).await.unwrap();
-    print!("{:?}", games);
-
-    // Get the first game
-    let game = games[0].clone();
-    print!("{:?}", game);
-    let game_id = game["id"].as_i64().unwrap();
-
-    // Get the details of the game
-    let details = game_details(game_id).await.unwrap();
-    print!("{:?}", details);
-
-    // Get the torrents for the game
-    let torrents = get_torrents(name).await.unwrap();
-    print!("{:?}", torrents);
-
-    // Download the first torrent
-    let url: String = torrents[1].1.clone();
-    download_torrent(&url).await.unwrap();
-    print!("Downloaded torrent");
-
-    // Ger the status of the downloads
-    let status = torrent::get_torrent_statuses().await;
-    print!("{:?}", status);
-
+    let games_list = api::games_list(name,"292bfc73936b4eb7abef6f83bbe982f9").await.unwrap();
+    
+    // print the games list with a 10 second delay
+    for game in games_list {
+        println!("{}", game);
+        tokio::time::sleep(tokio::time::Duration::from_secs(100)).await;
+    }
 }
-*/
 
 
+/*
 fn main() {
 
     // Create the logger
@@ -178,3 +160,4 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+*/
