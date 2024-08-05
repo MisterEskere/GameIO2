@@ -1,7 +1,11 @@
-# Tauri + SvelteKit + TypeScript
+# GameIO
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+GameIO is a crossplatform desktop game client to download and install videogames.
+It uses Rawg.IO api keys (even tho its planned to changed to another API key) to retrive info about games (name, genras, pictures...). 
+It uses its own Rust web scraper to find the games on 1337x.
+It uses librqbit library to manage torrents.
 
-## Recommended IDE Setup
+This project is heavly inspired by [Hydra Launcher](https://github.com/hydralauncher/hydra)
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+## This is a work in progress project and a v0 is still not available.
+If you want to help with the development feel to contact me.
