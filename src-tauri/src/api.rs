@@ -2,7 +2,7 @@ use reqwest::Client;
 use serde_json::Value;
 use serde_json::json;
 use lazy_static::lazy_static;
-use log::{trace, debug, error};
+use log::{trace, debug};
 
 // Client instance to make requests
 lazy_static! {

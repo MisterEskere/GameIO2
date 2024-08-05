@@ -83,20 +83,15 @@ async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> 
 /// Gets the magnet link of a torrent and downloads it
 #[tauri::command]
 async fn download_torrent(name : &str, game: &str, url: &str, uploader: &str) -> Result<(), String> {
-    
-    // print the URL
-    print!("Downloading torrent from: ");
-    print!("{}", url);
 
     // Get the magnet link of the torrent
     let magnet_link: String = scrapers::get_magnet_link(url).await.unwrap();
-    print!("Magnet link: {}", magnet_link);
     
     // Add the download to the database
-    let name = "Cyberpunk 2077"; // TODO change to the name of the torrent.
-    let game = "Cyberpunk 2077"; // TODO make name dynamic
-    let link = &magnet_link;
-    let uploader = "CODEX"; // TODO change to the uploader of the torrent.
+    let name = name;
+    let game = game;
+    let link = url;
+    let uploader = uploader;
     let path = env::get_download_path().await.unwrap();
     database::add_download(name, game, &link, uploader, &path).await.unwrap();
 
@@ -104,7 +99,9 @@ async fn download_torrent(name : &str, game: &str, url: &str, uploader: &str) ->
     let download_path = env::get_download_path().await.unwrap();
 
     // Start the torrent download as a new thread
-    torrent::download_torrent(&download_path, &magnet_link).await;
+    thread::spawn(move || {
+        torrent::download_torrent(&download_path, &magnet_link); // Directly use the owned Strings
+    });
 
     Ok(())
 }
@@ -119,6 +116,7 @@ async fn set_downloaded_path(path: &str) -> Result<(), String> {
 }
 /********************************************************************************************************************/
 
+/*
 #[tokio::main]
 async fn main() {
     let name = "cyberpunk";
@@ -131,9 +129,8 @@ async fn main() {
         tokio::time::sleep(tokio::time::Duration::from_secs(100)).await;
     }
 }
+    */
 
-
-/*
 fn main() {
 
     // Create the logger
@@ -160,4 +157,3 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-*/

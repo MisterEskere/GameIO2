@@ -50,6 +50,10 @@ pub async fn set_download_path(download_path: &str) -> Result<(), std::io::Error
 /// It will be called at the beginning of the application.
 pub fn create_env_file() -> Result<(), std::io::Error> {
     // Attempt to create the .env file, in case it already exists exit early
+    if std::path::Path::new(".env").exists() {
+        return Ok(());
+    }
+
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create_new(true)
