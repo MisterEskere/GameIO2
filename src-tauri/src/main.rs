@@ -85,8 +85,10 @@ async fn get_torrents(game_name: &str) -> Result<Vec<(String, String)>, String> 
 async fn download_torrent(name : &str, game: &str, url: &str, uploader: &str) -> Result<(), String> {
 
     // Get the magnet link of the torrent
+    print!("Getting magnet link... of {}", url);
     let magnet_link: String = scrapers::get_magnet_link(url).await.unwrap();
-    
+    print!("{}", magnet_link);
+
     // Add the download to the database
     let name = name;
     let game = game;
@@ -116,20 +118,6 @@ async fn set_downloaded_path(path: &str) -> Result<(), String> {
 }
 /********************************************************************************************************************/
 
-/*
-#[tokio::main]
-async fn main() {
-    let name = "cyberpunk";
-
-    let games_list = api::games_list(name,"292bfc73936b4eb7abef6f83bbe982f9").await.unwrap();
-    
-    // print the games list with a 10 second delay
-    for game in games_list {
-        println!("{}", game);
-        tokio::time::sleep(tokio::time::Duration::from_secs(100)).await;
-    }
-}
-    */
 
 fn main() {
 

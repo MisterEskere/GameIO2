@@ -28,6 +28,7 @@ static HANDLES: Lazy<Arc<Mutex<Vec<Arc<ManagedTorrent>>>>> =
 ///
 pub async fn download_torrent(directory: &str, magnet_link: &str) {
 
+    print!("Downloading torrent... {}", magnet_link);
     // Create the session
     trace!("Creating session");
     debug!("Directory: {}", directory);

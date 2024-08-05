@@ -13,7 +13,9 @@
   });
 
   async function game_details_invoke(game_id: number) {
+    console.log("Getting game details for game id: ", game_id);
     game_details = await invoke("game_details", { gameId: game_id });
+    console.log("Game details: ", game_details);
   }
 
   interface Game {
@@ -76,7 +78,6 @@
     </div>
     <button on:click={toggleDownload}>Download</button>
     {#if showDownload}
-    <button class="overlay" on:click={toggleDownload} type="button">Download</button>
       <div class="download-modal">
         <Download slug={game_details.slug} />
       </div>

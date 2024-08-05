@@ -26,8 +26,10 @@
 
   // Functin used to search for games, it will be called when the search button is clicked
   async function games_list_invoke(game_name: string) {
+    console.log("Searching for games with name: ", game_name);
     let search_response_list = await invoke("games_list", { gameName: game_name }) as Game[];
     search_response.set(search_response_list);
+    console.log("Search response: ", search_response_list);
   }
 
   // Update game

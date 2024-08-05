@@ -21,6 +21,11 @@
     torrents.set(result as Torrent[]);
     console.log($torrents); // Assuming you have a way to access the store value directly
   }
+
+  async function invoke_download_torrent(link: Torrent) {
+    console.log("Downloading torrent: ", link);
+    await invoke("download_torrent", { name: link[0], game: link[0], url: link[1], uploader: "unknown" });
+  }
 </script>
 
 <main>
@@ -30,7 +35,9 @@
     {#each $torrents as torrent}
       <div class="torrent-card">
         <a href={torrent[1]}>
-          <h2>{torrent[0]}</h2>
+          <button on:click={() => invoke_download_torrent(torrent)}>
+            {torrent[0]}
+          </button>
         </a>
       </div>
     {/each}
