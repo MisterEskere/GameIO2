@@ -39,7 +39,8 @@ pub fn create_database_sqlite() {
             name TEXT,
             game TEXT,
             link TEXT,
-            uploader TEXT
+            uploader TEXT,
+            path TEXT
         )",
         [],
     ).is_err() {
@@ -88,7 +89,7 @@ pub async fn get_downloads() -> Result<Vec<Value>, RusqliteError> {
 
     // Attempt to query the database for the downloads
     let conn = rusqlite::Connection::open("database.sqlite")?;
-    let mut stmt = conn.prepare("SELECT name, game, link, uploader FROM downloads")?;
+    let mut stmt = conn.prepare("SELECT name, game, link, uploader, path FROM downloads")?;
     let downloads = stmt
         .query_map([], |row| {
             Ok(json!({
@@ -172,4 +173,38 @@ pub async fn remove_download(name: &str) -> Result<bool, RusqliteError> {
     Ok(true)
 }
 
-// TODO: Add library support
+#[cfg(test)]
+mod tests{
+
+    use super::*;
+
+    #[tokio::test]
+    async fn create_database_sqlite_test() {
+        create_database_sqlite();
+        assert!(std::path::Path::new("database.sqlite").exists());
+    }
+
+    #[tokio::test]
+    async fn add_download_test() {
+        create_database_sqlite();
+        let result = add_download("Zelda", "Zelda", "magnet:?xt=urn:btih:...", "Noidea", "path").await.unwrap();
+        assert_eq!(result, true);
+    }
+
+    #[tokio::test]
+    async fn get_downloads_test() {
+        create_database_sqlite();
+        let downloads: Vec<Value> = get_downloads().await.unwrap();
+        print!("{:?}", downloads);
+        assert!(!downloads.is_empty());
+    }
+
+    #[tokio::test]
+    async fn remove_download_test() {
+        create_database_sqlite();
+        add_download("Zelda", "Zelda", "magnet:?xt=urn:btih:...", "Noidea", "path").await.unwrap();
+        let result = remove_download("Zelda").await.unwrap();
+        assert_eq!(result, true);
+    }
+    
+}
