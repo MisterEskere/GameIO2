@@ -120,3 +120,20 @@ async fn get_page_html(url: &str) -> Result<Html, Error> {
 
     Ok(document)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_torrents() {
+        let torrents = get_torrents("Cyberpunk 2077").await.unwrap();
+        assert!(torrents.len() > 0);
+    }
+
+    #[tokio::test]
+    async fn test_get_magnet_link() {
+        let magnet_link = get_magnet_link("https://1337x.to/torrent/4640384/Cyberpunk-2077-v1-06-REPACK-CODEX/").await.unwrap();
+        assert!(magnet_link.starts_with("magnet:?"));
+    }
+}
