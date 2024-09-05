@@ -32,7 +32,7 @@ async fn start_torrents() {
 async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
     
     // Retrieve the API_KEY from the .env file
-    let api_key = match env::get_api_key().await {
+    let api_key = match env::get_id_client().await {
         Ok(key) => key,
         Err(e) => return Err(format!("Failed to get API key: {}", e)),
     };
@@ -54,7 +54,7 @@ async fn games_list(game_name: &str) -> Result<Vec<serde_json::Value>, String> {
 async fn game_details(game_id: i64) -> Result<serde_json::Value, String> {
 
     // Retrieve the API_KEY from the
-    let api_key = match env::get_api_key().await {
+    let api_key = match env::get_id_client().await {
         Ok(key) => key,
         Err(e) => return Err(format!("Failed to get API key: {}", e)),
     };
