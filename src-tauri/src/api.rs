@@ -1,8 +1,7 @@
+use anyhow::Ok;
 use reqwest::Client;
 use serde_json::Value;
-use serde_json::json;
 use lazy_static::lazy_static;
-use log::{trace, debug};
 
 use crate::env;
 
@@ -11,173 +10,118 @@ lazy_static! {
     static ref CLIENT: Client = Client::new();
 }
 
-/// Function to make a GET request to a URL and return the response as JSON
+/// Function to make a GET request to a URL and return the response as a String
 /// 
 /// Arguments:
-///   - url: &str - The URL to make the request to  
+/// - url: &str - The URL to make the request to
 /// 
 /// Returns:
-///  - Result<Value, String> - The response as a JSON object
+/// - response: String - The response as a String
 /// 
-async fn get_request(url: &str) -> Result<serde_json::Value, String> {
-    // Make the request
-    let response = match CLIENT.get(url).send().await {
-        Ok(resp) => resp,
-        Err(e) => return Err(e.to_string()), // Convert the error to a String here
-    };
-
-    // Check if the response status is success
-    if !response.status().is_success() {
-        return Err(format!("Request failed with status: {}", response.status()));
-    }
-
-    // Parse the response body as JSON
-    let response = match response.json::<Value>().await {
-        Ok(json) => json,
-        Err(e) => return Err(e.to_string()),
-    };
-
-    Ok(response)
-}
-
-async fn post_request(url: &str, body: &Value) -> Result<serde_json::Value, String> {
-    // Make the request
-    let response = match CLIENT.post(url).json(body).send().await {
-        Ok(resp) => resp,
-        Err(e) => return Err(e.to_string()), // Convert the error to a String here
-    };
-
-    print!("{}", response);
-
-    // Check if the response status is success
-    if !response.status().is_success() {
-        return Err(format!("Request failed with status: {}", response.status()));
-    }
-
-    // Parse the response body as JSON
-    let response = match response.json::<Value>().await {
-        Ok(json) => json,
-        Err(e) => return Err(e.to_string()),
-    };
-
-    Ok(response)
-}
-
-/// .
-///
 /// # Errors
-///
-/// This function will return an error if .
-async fn get_token() -> Result<String, String> {
+/// - Any error that occurs during the request
+/// 
+/// # Example
+/// ```
+/// let response = get_request("https://httpbin.org/get").await.unwrap();
+/// ```
+async fn get_request(url: &str) -> Result<Value, anyhow::Error> {
 
-    // Retrieve the ID_CLIENT and SECRET from the environment file
-    let id_client = match env::get_id_client().await {
-        Ok(id_client) => id_client,
-        Err(e) => return Err(e.to_string()),
-    };
+    // Make the GET request
+    let response = CLIENT.get(url)
+        .send()
+        .await?
+        .text()
+        .await?;
 
-    let secret = match env::get_secret().await {
-        Ok(secret) => secret,
-        Err(e) => return Err(e.to_string()),
-    };
+    // Convert the response to a JSON object
+    let response = serde_json::from_str(&response)?;
 
-    // Make the POST request to get the token passing the ID_CLIENT and SECRET in the URL
-    let url = format!("https://id.twitch.tv/oauth2/token?client_id={}&client_secret={}&grant_type=client_credentials", id_client, secret);
-
-    let response = match post_request(&url, &Value::Null).await {
-        Ok(json) => json,
-        Err(e) => return Err(e.to_string()),
-    };
-
-    // Extract the "access_token" from the JSON response
-    let access_token = match response["access_token"].as_str() {
-        Some(token) => token,
-        None => return Err("Failed to extract 'access_token' from response".to_string()),
-    };
-
-    Ok(access_token.to_string())
+    Ok(response)
 }
-/// Function to get the list of games from the RAWG API
-/// It will be called when the used opens the Home page and searches for a game
+
+/// Function to make a POST request to a URL and return the response as JSON
 /// 
 /// Arguments:
-///    - game_name: &str - The name of the game to search for, if empty, it will return the top games
-///    - api_key: &str - The API key to use for the request
+///  - url: &str - The URL to make the request to
+/// - body: String - The body of the POST request
 /// 
 /// Returns:
-///   - Result<Vec<Value>, String> - A vector of JSON objects containing the details of the games
-///   - String - An error message if the request fails
-///
-/// Example:
-/// ```rust
-///    let games = games_list("Cyberpunk 2077", "Y0ur_Ap1_K3y").await.unwrap();
+/// - response: Value - The response as a JSON object
+/// 
+/// # Errors
+/// - Any error that occurs during the request
+/// 
+/// # Example
+/// ```
+/// let response = post_request("https://httpbin.org/post", "body".to_string()).await.unwrap();
 /// ```
 /// 
-pub async fn games_list(game_name: &str, api_key: &str) -> Result<Vec<Value>, String> {
+async fn post_request(url: &str, body: String) -> Result<Value, anyhow::Error> {
 
-    // Create the URL
-    let url = format!("https://rawg.io/api/games?page=1&page_size=100&search={}&parent_platforms=1,6,5&stores=1,5,11&key={}", game_name, api_key);
-    trace!("Requesting games lists");
-    debug!("URL: {}", url);
+    // Make the POST request
+    let response = CLIENT.post(url)
+        .body(body) // Pass the String directly
+        .send()
+        .await?
+        .text()
+        .await?;
 
-    // Make the get request
-    let response = match get_request(&url).await {
-        Ok(json) => json,
-        Err(e) => return Err(e),
-    };
+    // Convert the response to a JSON object
+    let response = serde_json::from_str(&response)?;
 
-    // Extract the "results" list from the JSON response
-    let results = match response["results"].as_array() {
-        Some(results) => results,
-        None => return Err("Failed to extract 'results' from response".to_string()),
-    };
-
-    Ok(results.clone())
+    Ok(response)
 }
 
 
-pub async fn game_details(game_id: i64, api_key: &str) -> Result<serde_json::Value, String> {
+/// Function to get the access token from the Twitch API
+/// 
+/// # Returns
+/// - `access_token: String` - The access token
+/// 
+/// # Errors
+/// - Any error that occurs during the request
+/// 
+/// # Example
+/// ```
+/// let token = get_token().await.unwrap();
+/// ```
+///
+async fn get_token() -> Result<String, anyhow::Error> {
 
-    // Create the URL
-    let url = format!("https://rawg.io/api/games/{}?key={}", game_id, api_key);
+    // Retrieve the ID_CLIENT and SECRET from the environment file
+    let id_client = env::get_id_client().await.unwrap();
+    let secret = env::get_secret().await.unwrap();
 
-    // Make the get request
-    let response = match get_request(&url).await {
-        Ok(json) => json,
-        Err(e) => return Err(e),
-    };
+    // make the POST request
+    let url = format!("https://id.twitch.tv/oauth2/token?client_id={}&client_secret={}&grant_type=client_credentials", id_client, secret);
 
-    // Of the response, extract the "id", "slug", "name", "name_original", "description", 
-    // "metacritic", "image_background", "background_image_additional", "released", "genres"
-    let id = response["id"].as_i64().unwrap();
-    let slug = response["slug"].as_str().unwrap();
-    let name = response["name"].as_str().unwrap();
-    let description = response["description"].as_str().unwrap();
-    let background_image = response["background_image"].as_str().unwrap();
-    let background_image_additional = response["background_image_additional"].as_str().unwrap();
-    let released = response["released"].as_str().unwrap();
-    let genres = response["genres"].as_array().unwrap();
+    let response = post_request(&url, "".to_string()).await?;
 
-    // make a JSON object with the extracted fields
-    let game: serde_json::Value = json!({
-        "id": id,
-        "slug": slug,
-        "name": name,
-        "description": description,
-        "background_image": background_image,
-        "background_image_additional": background_image_additional,
-        "released": released,
-        "genres": genres
-    });
+    // extract the access token from the response
+    let access_token = response["access_token"].as_str().unwrap().to_string();
 
-    // Return the response
-    Ok(game)
+    Ok(access_token)
 }
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_get_request() {
+        let response = get_request("https://httpbin.org/get").await.unwrap();
+        print!("{:?}", response);
+        assert!(response.is_object());
+    }
+
+    #[tokio::test]
+    async fn test_post_request() {
+        let response = post_request("https://httpbin.org/post", "".to_string()).await.unwrap();
+        print!("{:?}", response);
+        assert!(response.is_object());
+    }
 
     #[tokio::test]
     async fn test_get_token() {
