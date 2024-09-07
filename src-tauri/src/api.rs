@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use anyhow::Ok;
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue, HeaderName};
@@ -127,6 +129,29 @@ async fn get_token() -> Result<String, anyhow::Error> {
     Ok(access_token)
 }
 
+/// Function to call the games endpoint of the Twitch API
+async fn games(search: String) -> Result<Value, anyhow::Error> {
+    // Get the access token
+    let token = TOKEN.lock().await;
+
+    // Prepare the headers
+    let headers = vec![
+        json!({"key": "Content-Type", "value": "application/json"}),
+        json!({"key": "Client-ID", "value": env::get_id_client().await.unwrap()}),
+        json!({"key": "Authorization", "value": format!("Bearer {}", token)}),
+    ];
+
+    // Prepare the body with the search query
+    // Shape of the body: search="Zelda"; fields cover, game_modes, genres, name, slug; where platforms=[6]; limit 500;
+    let body = format!("search \"{}\"; fields cover, game_modes, genres, name, slug; where platforms=[6]; limit 500;", search);
+    print!("{}", body);
+
+    // Make the POST request
+    let url = "https://api.igdb.com/v4/games";
+    let response = post_request(url, body, headers).await?;
+
+    Ok(response)
+}
 
 #[cfg(test)]
 mod tests {
@@ -152,5 +177,12 @@ mod tests {
     async fn test_get_token() {
         let token = get_token().await.unwrap();
         assert!(!token.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_games() {
+        get_token().await.unwrap();
+        let response = games("Zelda".to_string()).await.unwrap();
+        assert!(response.is_object());
     }
 }
