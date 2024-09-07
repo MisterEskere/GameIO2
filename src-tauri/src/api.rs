@@ -1,13 +1,22 @@
 use anyhow::Ok;
 use reqwest::Client;
+use reqwest::header::{HeaderMap, HeaderValue, HeaderName};
 use serde_json::Value;
 use lazy_static::lazy_static;
+use serde_json::json;
+use tokio::sync::Mutex;
+use tokio::sync::MutexGuard;
 
 use crate::env;
 
 // Client instance to make requests
 lazy_static! {
     static ref CLIENT: Client = Client::new();
+}
+
+// Assuming TOKEN is defined somewhere globally
+lazy_static! {
+    static ref TOKEN: Mutex<String> = Mutex::new(String::new());
 }
 
 /// Function to make a GET request to a URL and return the response as a String
@@ -57,11 +66,20 @@ async fn get_request(url: &str) -> Result<Value, anyhow::Error> {
 /// let response = post_request("https://httpbin.org/post", "body".to_string()).await.unwrap();
 /// ```
 /// 
-async fn post_request(url: &str, body: String) -> Result<Value, anyhow::Error> {
+async fn post_request(url: &str, body: String, headers: Vec<Value>) -> Result<Value, anyhow::Error> {
+    // Prepare the headers
+    let mut header_map = HeaderMap::new();
+
+    for header in headers {
+        let key = header["key"].as_str().unwrap().to_string();
+        let value = header["value"].as_str().unwrap().to_string();
+        header_map.insert(HeaderName::from_bytes(key.as_bytes())?, HeaderValue::from_str(&value)?);
+    }
 
     // Make the POST request
     let response = CLIENT.post(url)
         .body(body) // Pass the String directly
+        .headers(header_map)
         .send()
         .await?
         .text()
@@ -95,11 +113,16 @@ async fn get_token() -> Result<String, anyhow::Error> {
 
     // make the POST request
     let url = format!("https://id.twitch.tv/oauth2/token?client_id={}&client_secret={}&grant_type=client_credentials", id_client, secret);
+    let headers = vec![json!({"key": "Content-Type", "value": "application/json"})];
 
-    let response = post_request(&url, "".to_string()).await?;
+    let response = post_request(&url, "".to_string(), headers).await?;
 
     // extract the access token from the response
     let access_token = response["access_token"].as_str().unwrap().to_string();
+
+    // Set the access token
+    let mut token: MutexGuard<'_, String> = TOKEN.lock().await;
+    *token = access_token.clone();
 
     Ok(access_token)
 }
@@ -107,6 +130,7 @@ async fn get_token() -> Result<String, anyhow::Error> {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[tokio::test]
@@ -118,7 +142,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_post_request() {
-        let response = post_request("https://httpbin.org/post", "".to_string()).await.unwrap();
+        let headers = vec![json!({"key": "Content-Type", "value": "application/json"})];
+        let response = post_request("https://httpbin.org/post", "".to_string(), headers).await.unwrap();
         print!("{:?}", response);
         assert!(response.is_object());
     }
