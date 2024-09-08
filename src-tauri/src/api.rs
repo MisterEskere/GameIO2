@@ -183,6 +183,6 @@ mod tests {
     async fn test_games() {
         get_token().await.unwrap();
         let response = games("Zelda".to_string()).await.unwrap();
-        assert!(response.is_object());
+        assert!(response.is_array());
     }
 }
