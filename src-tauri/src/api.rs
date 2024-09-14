@@ -153,6 +153,52 @@ async fn games(search: String) -> Result<Value, anyhow::Error> {
     Ok(response)
 }
 
+// Function to call the game endpoint of the Twitch API
+async fn game(id: i32) -> Result<Value, anyhow::Error> {
+    // Get the access token
+    let token = TOKEN.lock().await;
+
+    // Prepare the headers
+    let headers = vec![
+        json!({"key": "Content-Type", "value": "application/json"}),
+        json!({"key": "Client-ID", "value": env::get_id_client().await.unwrap()}),
+        json!({"key": "Authorization", "value": format!("Bearer {}", token)}),
+    ];
+
+    // Prepare the body with the search query
+    let body = format!("fields name, artworks, cover, first_release_date, game_modes, genres, language_supports, name, platforms, screenshots, similar_games, storyline, summary, videos; where id={};", id);
+
+    // Make the POST request
+    let url = "https://api.igdb.com/v4/games";
+    let response = post_request(url, body, headers).await?;
+
+    Ok(response)
+}
+
+
+/// Function to call the game_modes endpoint of the Twitch API
+async fn game_modes() -> Result<Value, anyhow::Error> {
+    // Get the access token
+    let token = TOKEN.lock().await;
+
+    // Prepare the headers
+    let headers = vec![
+        json!({"key": "Content-Type", "value": "application/json"}),
+        json!({"key": "Client-ID", "value": env::get_id_client().await.unwrap()}),
+        json!({"key": "Authorization", "value": format!("Bearer {}", token)}),
+    ];
+
+    // Prepare the body with the search query
+    let body = "fields name;";
+
+    // Make the POST request
+    let url = "https://api.igdb.com/v4/game_modes";
+    let response = post_request(url, body.to_string(), headers).await?;
+
+    Ok(response)
+}    
+
+// Function to call the game endpoint of the Twitch API
 #[cfg(test)]
 mod tests {
 
@@ -183,6 +229,20 @@ mod tests {
     async fn test_games() {
         get_token().await.unwrap();
         let response = games("Zelda".to_string()).await.unwrap();
+        assert!(response.is_array());
+    }
+
+    #[tokio::test]
+    async fn test_game() {
+        get_token().await.unwrap();
+        let response = game(7346).await.unwrap();
+        assert!(response.is_array());
+    }
+
+    #[tokio::test]
+    async fn test_game_modes() {
+        get_token().await.unwrap();
+        let response = game_modes().await.unwrap();
         assert!(response.is_array());
     }
 }
